@@ -1,4 +1,4 @@
-# 🧰 Bash Aliasi i Sistemski Alati (Debian / Linux)
+# 🧰 Bash Aliasi i Sistemski Alati (Debian / Linux) - DOS 2.0 bu gogos
 
 Modularna, čista i automatizovana kolekcija Bash aliasa, funkcija i alata optimizovanih za **Debian 13 (Trixie)** i **KDE Plasma 6**, ali primenljivih na većini savremenih Linux distribucija.
 
