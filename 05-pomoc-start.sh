@@ -16,7 +16,6 @@ _srv_stat() {
 }
 
 # =============================================================
-# ["poruka"] - Dodaje sve izmene, pravi commit i šalje na GitHub (git add, commit, push)
 git-izmeni() {
     if [ -z "$1" ]; then
         _warn "ℹ️ Upotreba: git-izmeni \"Opis izmene\""
@@ -33,7 +32,7 @@ git-izmeni() {
     _info "🚀 Šaljem na GitHub..." && \
     git push
 }
-alias git-izmeni="git-izmeni"
+alias git-izmeni="git-izmeni" # ["poruka"] - Dodaje izmene projekta, pravi commit i šalje na GitHub
 # =================================================================
 # [5. POMOĆ I KORISNIČKI ALATI]
 # =================================================================
