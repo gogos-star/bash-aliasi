@@ -82,5 +82,17 @@ Nakon što otvorite novi terminal (ili pokrenete `source ~/.bashrc`), dostupne s
 
 ---
 
+## 🎓 Šta početnici mogu da nauče iz ovog repozitorijuma
+
+Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet **Debian / Linux** terminala i žele da vide kako se od običnih komandi gradi uredno, bezbedno i automatizovano radno okruženje:
+
+* **Modularna organizacija skripti:** Umesto jednog pretrpanog `.bashrc` fajla od hiljadu linija, konfiguracija je podeljena u manje, pregledne celine po temama (`01`–`05`).
+* **Praktična upotreba Linux alata:** Kroz stvarne primere možeš videti kako rade i kako se kombinuju `awk`, `sed`, `grep`, `systemd`, `ip`, `ss` i `nmap`.
+* **Bezbedno čuvanje osetljivih podataka:** Odvajanje privatnih IP/MAC adresa i putanja do SSH ključeva u `local.env` (uz `.gitignore`) sprečava slučajno objavljivanje lokalnih podataka na GitHub.
+* **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
+* **Kontrola eksternih uređaja (IoT / TV):** Kroz modul za LG webOS prikazano je kako se preko SSH-a i JSON poruka (`luna-send`) upravlja pametnim uređajima na lokalnoj mreži direktno iz komandne linije.
+
+---
+
 ## 📄 Licenca
 Ovaj projekat je otvorenog koda pod [MIT licencom](LICENSE).
