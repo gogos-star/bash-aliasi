@@ -1,6 +1,6 @@
 
 # =================================================================
-#                 POMOĆNE FUNKCIJE ZA BOJE I SERVISE
+#                 POMOĆNE FUNKCIJE ZA BOJE I SERVISE i GIThub
 # =================================================================
 _info() { printf "\033[1;34m%s\033[0m\n" "$*"; }
 _ok()   { printf "\033[1;32m%s\033[0m\n" "$*"; }
@@ -15,7 +15,25 @@ _srv_stat() {
     fi
 }
 
+# =============================================================
+# ["poruka"] - Dodaje sve izmene, pravi commit i šalje na GitHub (git add, commit, push)
+git-izmeni() {
+    if [ -z "$1" ]; then
+        _warn "ℹ️ Upotreba: git-izmeni \"Opis izmene\""
+        return 1
+    fi
 
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        _err "❌ Greška: Trenutni folder nije Git repozitorijum!"
+        return 1
+    fi
+
+    _info "📦 Dodajem izmene i pravim commit..."
+    git add . && git commit -m "$*" && \
+    _info "🚀 Šaljem na GitHub..." && \
+    git push
+}
+alias git-izmeni="git-izmeni"
 # =================================================================
 # [5. POMOĆ I KORISNIČKI ALATI]
 # =================================================================
