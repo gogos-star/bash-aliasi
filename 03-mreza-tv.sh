@@ -195,7 +195,7 @@ tv-ssh() {
     ssh -i "$LG_TV_KEY" -p "$PORT" "$USER@$IP"
 }
 # =================================================================
-# [komanda] - Daljinske komande za LG TV (off, reboot, toast, vol, youtube)
+# [komanda] - LG TV daljinski (off, reboot, toast, vol, youtube, screenoff, glass, install)
 tv-cmd() {
     local AKCIJA="$1"
     if [ -z "$AKCIJA" ]; then
@@ -214,6 +214,28 @@ tv-cmd() {
         vol)     _info "🔉 Zvuk na ${2:-15}..."; _tv_exec "luna-send -n 1 luna://com.webos.audio/setVolume '{\"volume\":${2:-15}}'" ;;
         youtube) _info "▶️ Pokrećem YouTube..."; _tv_exec "luna-send -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"youtube.leanback.v4\"}'" ;;
         *)       _info "⚡ Izvršavam: $*";       _tv_exec "$*" ;;
+                screenoff)
+            _info "🌑 Gasim ekran (zvuk ostaje)..."
+            _tv_exec "luna-send -n 1 luna://com.webos.service.tvpower/power/turnOffScreen '{\"standbyMode\":\"active\"}'"
+            ;;
+        glass)
+            _info "🏠 Otvaram GlassHome..."
+            _tv_exec "luna-send -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"io.github.rorygallagher2024.lg-webos-dashboard\"}'"
+            ;;
+        install)
+            local IPK="$2"
+            if [ -z "$IPK" ] || [ ! -f "$IPK" ]; then
+                _err "❌ Navedi ispravan .ipk fajl (npr. tv-cmd install aplikacija.ipk)"
+                return 1
+            fi
+            local IME=$(basename "$IPK")
+            local APP_ID=$(python3 -c "import tarfile, json; t=tarfile.open('$IPK'); d=tarfile.open(fileobj=t.extractfile('./data.tar.gz')); m=[x for x in d.getnames() if x.endswith('appinfo.json')][0]; print(json.load(d.extractfile(m))['id'])" 2>/dev/null)
+            _info "📦 Šaljem $IME na TV..."
+            scp -O -i "$LG_TV_KEY" "$IPK" root@"$LG_TV_IP":/tmp/ && \
+            _info "⚙️ Instaliram ${APP_ID:-$IME}..." && \
+            _tv_exec "luna-send -n 1 -f luna://com.webos.appInstallService/dev/install '{\"id\":\"${APP_ID:-com.example.app}\",\"ipkUrl\":\"/tmp/$IME\",\"subscribe\":false}'"
+            ;;
+
     esac
 }
 # =================================================================

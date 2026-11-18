@@ -15,6 +15,7 @@ _srv_stat() {
     fi
 }
 
+
 # =================================================================
 # [5. POMOĆ I KORISNIČKI ALATI]
 # =================================================================
@@ -85,7 +86,10 @@ pomoc() {
             }
             desc = sub_desc
         }
-        printf "  " C_CMD "%-27s" C_RESET " - %s\n", cmd, desc
+        printf "  " C_CMD "%-34s" C_RESET " - %s\n", cmd, desc
+
+
+
     }
     ' ~/.bash_tools/*.sh
 
