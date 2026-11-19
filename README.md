@@ -91,7 +91,7 @@ Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet
 * **Praktična upotreba Linux alata:** Kroz stvarne primere možeš videti kako rade i kako se kombinuju `awk`, `sed`, `grep`, `systemd`, `ip`, `ss` i `nmap`.
 * **Bezbedno čuvanje osetljivih podataka:** Odvajanje privatnih IP/MAC adresa i putanja do SSH ključeva u `local.env` (uz `.gitignore`) sprečava slučajno objavljivanje lokalnih podataka na GitHub.
 * **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
-* **Dvosmerno preslovljavanje ćirilice i latinice `preslovi` putem clipboard-a (uz podršku za X11 i Wayland preko scripts/preslovi.py)
+* **Dvosmerno preslovljavanje ćirilice i latinice `preslovi` putem clipboard-a (uz podršku za X11 i Wayland preko scripts/preslovi.py).
 * **Kontrola eksternih uređaja (IoT / TV):** Kroz modul za LG webOS prikazano je kako se preko SSH-a i JSON poruka (`luna-send`) upravlja pametnim uređajima na lokalnoj mreži direktno iz komandne linije.
 
 ---

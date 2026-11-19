@@ -10,8 +10,8 @@ alias cirilica2='systemctl --user set-environment LANG=sr_RS.UTF-8 LC_ALL=sr_RS.
 alias cirilica='export LANG=sr_RS.UTF-8 LC_ALL=sr_RS.UTF-8 && _ok "✅ Sesija: ćirilica"' # Prebacuje sesiju terminala na ćirilicu
 alias latinica='export LANG=sr_RS.UTF-8@latin LC_ALL=sr_RS.UTF-8@latin && _ok "✅ Sesija: latinica"' # Prebacuje sesiju terminala na latinicu
 alias engleski='export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && _ok "✅ Sesija: engleski"' # Prebacuje sesiju terminala na engleski
-# [tekst] - Preslovljava tekst u clipboard-u (ili prosleđeni tekst) između ćirilice i latinice
 
+# [tekst] - Preslovljava tekst u clipboard-u (ili prosleđeni tekst) između ćirilice i latinice
 preslovi() {
     local skripta="$HOME/.bash_tools/scripts/preslovi.py"
 
@@ -37,7 +37,6 @@ preslovi() {
     echo "✅ Tekst u clipboard-u je uspešno preslovljen."
 }
 
-#===========================================
 
 alias resplasma='_info "🔄 Restartujem KDE Plasma 6..."; kquitapp6 plasmashell 2>/dev/null || killall plasmashell; kstart plasmashell > /dev/null 2>&1 &' # Restartuje samo KDE Plasma 6 panel (bez gašenja programa)
 alias reskde='_info "🔄 Restartujem SDDM..."; sudo systemctl restart sddm' # Restartuje ceo grafički server (SDDM)
