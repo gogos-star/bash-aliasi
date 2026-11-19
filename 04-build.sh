@@ -302,21 +302,7 @@ EOF
         return 1
     fi
 }
-# =================================================================
 
-# Instalira sveže napravljen .deb paket iz dist/executables/
-pnpm-install-deb() {
-    local DEB_FILE=$(ls dist/executables/*.deb 2>/dev/null | head -n 1)
-    if [ -n "$DEB_FILE" ]; then
-        echo "📥 Pronađen paket: $DEB_FILE"
-        sudo dpkg -i "$DEB_FILE"
-        sudo apt-get install -f -y
-        echo -e "\e[1;32m✅ APLIKACIJA JE USPEŠNO INSTALIRANA NA SISTEM!\e[0m"
-    else
-        echo "❌ Greška: .deb paket nije pronađen u dist/executables/ folderu!"
-        return 1
-    fi
-}
 # =================================================================
 
 # WASM/Low-RAM build za Vite frontend projekte
@@ -364,6 +350,22 @@ EOF
         ls -lh public/build dist 2>/dev/null
     else
         echo "❌ Greška tokom Vite build-a!"
+        return 1
+    fi
+}
+
+# =================================================================
+
+# Instalira sveže napravljen .deb paket iz dist/executables/
+pnpm-install-deb() {
+    local DEB_FILE=$(ls dist/executables/*.deb 2>/dev/null | head -n 1)
+    if [ -n "$DEB_FILE" ]; then
+        echo "📥 Pronađen paket: $DEB_FILE"
+        sudo dpkg -i "$DEB_FILE"
+        sudo apt-get install -f -y
+        echo -e "\e[1;32m✅ APLIKACIJA JE USPEŠNO INSTALIRANA NA SISTEM!\e[0m"
+    else
+        echo "❌ Greška: .deb paket nije pronađen u dist/executables/ folderu!"
         return 1
     fi
 }

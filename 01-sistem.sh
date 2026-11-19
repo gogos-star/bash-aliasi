@@ -4,24 +4,49 @@
 # [1. SISTEM, DIJAGNOSTIKA I HARDVER]
 # =================================================================
 alias edit='mcedit'                               # Brzi tekstualni editor (Midnight Commander)
-alias temp="watch -n 2 'sensors'"                 # Praćenje temperature senzora uživo (na 2 sekunde)
-alias tlpstat='sudo tlp-stat -s'                  # Statistika baterije i TLP napajanja
-alias sredi-grub='_info "⚙️ Ažuriram initramfs i GRUB..."; sudo update-initramfs -u -k all && sudo update-grub && _ok "✅ GRUB je uspešno osvežen!"' # Osvežavanje initramfs-a i GRUB menija
 alias birajeditor='_info "📝 Otvaram izbor sistemskog editora..."; sudo update-alternatives --config editor' # Izbor podrazumevanog sistemskog editora
 alias sacuvaj-podesavanja='_info "💾 Pravim bekap u /home..."; sudo tar -czf ~/podesavanja_backup_$(date +%Y-%m-%d).tar.gz /etc ~/.bash_aliases ~/.bash_tools ~/.bashrc ~/.ssh 2>/dev/null && _ok "✅ Bekap je sačuvan!"' # Bekap /etc, ~/.bash_tools, .bashrc i .ssh u /home
-
-alias resplasma='_info "🔄 Restartujem KDE Plasma 6..."; kquitapp6 plasmashell 2>/dev/null || killall plasmashell; kstart plasmashell > /dev/null 2>&1 &' # Restartuje samo KDE Plasma 6 panel (bez gašenja programa)
-alias reskde='_info "🔄 Restartujem SDDM..."; sudo systemctl restart sddm' # Restartuje ceo grafički server (SDDM)
-
-alias servisi='provera && systemctl list-unit-files --type=service --state=enabled' # Spisak omogućenih systemd servisa
-alias tajmeri='systemctl list-timers --all'        # Spisak svih zakazanih systemd tajmera
-alias tajming='systemd-analyze && echo "-----" && systemd-analyze critical-chain && echo "-----" && systemd-analyze blame | head -n 15 && echo "-----" && systemctl --failed' # Brzina podizanja sistema (systemd-analyze)
-
 alias cirilica2='systemctl --user set-environment LANG=sr_RS.UTF-8 LC_ALL=sr_RS.UTF-8 && _ok "✅ Sistemski jezik: ćirilica"' # Postavlja sistemski jezik na ćirilicu (okruženje)
 alias cirilica='export LANG=sr_RS.UTF-8 LC_ALL=sr_RS.UTF-8 && _ok "✅ Sesija: ćirilica"' # Prebacuje sesiju terminala na ćirilicu
 alias latinica='export LANG=sr_RS.UTF-8@latin LC_ALL=sr_RS.UTF-8@latin && _ok "✅ Sesija: latinica"' # Prebacuje sesiju terminala na latinicu
 alias engleski='export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && _ok "✅ Sesija: engleski"' # Prebacuje sesiju terminala na engleski
+# [tekst] - Preslovljava tekst u clipboard-u (ili prosleđeni tekst) između ćirilice i latinice
 
+preslovi() {
+    local skripta="$HOME/.bash_tools/scripts/preslovi.py"
+
+    # Provera da li postoji alat za clipboard (xclip ili wl-clipboard)
+    if [ -n "$WAYLAND_DISPLAY" ] && ! command -v wl-copy &> /dev/null; then
+        echo "❌ Nedostaje paket 'wl-clipboard' (instaliraj: sudo apt install wl-clipboard)"
+        return 1
+    elif [ -z "$WAYLAND_DISPLAY" ] && ! command -v xclip &> /dev/null; then
+        echo "❌ Nedostaje paket 'xclip' (instaliraj: sudo apt install xclip)"
+        return 1
+    fi
+
+    if [ $# -gt 0 ]; then
+        # Ako je prosleđen tekst kao argument, stavi ga u clipboard i preslovi
+        if [ -n "$WAYLAND_DISPLAY" ]; then
+            printf "%s" "$*" | wl-copy
+        else
+            printf "%s" "$*" | xclip -i -selection clipboard
+        fi
+    fi
+
+    python3 "$skripta"
+    echo "✅ Tekst u clipboard-u je uspešno preslovljen."
+}
+
+#===========================================
+
+alias resplasma='_info "🔄 Restartujem KDE Plasma 6..."; kquitapp6 plasmashell 2>/dev/null || killall plasmashell; kstart plasmashell > /dev/null 2>&1 &' # Restartuje samo KDE Plasma 6 panel (bez gašenja programa)
+alias reskde='_info "🔄 Restartujem SDDM..."; sudo systemctl restart sddm' # Restartuje ceo grafički server (SDDM)
+alias servisi='provera && systemctl list-unit-files --type=service --state=enabled' # Spisak omogućenih systemd servisa
+alias tajmeri='systemctl list-timers --all'        # Spisak svih zakazanih systemd tajmera
+alias tajming='systemd-analyze && echo "-----" && systemd-analyze critical-chain && echo "-----" && systemd-analyze blame | head -n 15 && echo "-----" && systemctl --failed' # Brzina podizanja sistema (systemd-analyze)
+alias sredi-grub='_info "⚙️ Ažuriram initramfs i GRUB..."; sudo update-initramfs -u -k all && sudo update-grub && _ok "✅ GRUB je uspešno osvežen!"' # Osvežavanje initramfs-a i GRUB menija
+alias tlpstat='sudo tlp-stat -s' # Statistika baterije i TLP napajanja
+alias temp="watch -n 2 'sensors'"  # Praćenje temperature senzora uživo (na 2 sekunde)
 # =================================================================
 #                 DIJAGNOSTIKA I KONTROLA SERVISA
 # =================================================================
@@ -134,5 +159,5 @@ osvezi_sistem() {
         _err "❌ GREŠKA U SINTAKSI: Izmene nisu učitane!"
     fi
 }
-alias osvezi="osvezi_sistem"                      # Provera sintakse i ponovno učitavanje svih alata
+alias osvezi="osvezi_sistem" # Provera sintakse i ponovno učitavanje svih alata
 
