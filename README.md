@@ -10,12 +10,12 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 
 | Fajl | Kategorija | Ključne mogućnosti |
 | :--- | :--- | :--- |
-| **`01-sistem.sh`** | **Sistem, Dijagnostika i Hardver** | Dijagnostika hardvera (`provera` - RAM, CPU temperatura, disk, IP), praćenje senzora (`temp`), TLP napajanje (`tlpstat`), restart KDE panela (`resplasma`) i SDDM-a (`reskde`), bekap konfiguracija (`sacuvaj-podesavanja`), promena jezika sesije (`cirilica`, `latinica`, `engleski`), kontrola štampača (`stampac`) i GPS-a (`gps`), preslovljavanje (`preslovi`) iz cir u lat i obrnuto. |
-| **`02-paketi.sh`** | **Održavanje, Paketi i Diskovi** | Kompletno ažuriranje (`sysupdate` za APT, Flatpak i Snap), dubinsko čišćenje (`genclean` / `generalno-ciscenje`), čišćenje fontova (`fontovi`), univerzalno raspakivanje arhiva (`extract`), popravka FAT32 USB fleški (`popravi`), ACPI dijagnostika (`proveri-acpi`, `gpeprekid`), Dvosmerno preslovljavanje ćirilice i latinice (`preslovi`). |
+| **`01-sistem.sh`** | **Sistem, Dijagnostika i Hardver** | Dijagnostika hardvera (`provera` - RAM, CPU temperatura, disk, IP), praćenje senzora (`temp`), TLP napajanje (`tlpstat`), restart KDE panela (`resplasma`) i SDDM-a (`reskde`), bekap konfiguracija (`sacuvaj-podesavanja`), promena jezika sesije (`cirilica`, `latinica`, `engleski`), kontrola štampača (`stampac`) i GPS-a (`gps`). |
+| **`02-paketi.sh`** | **Održavanje, Paketi i Diskovi** | Kompletno ažuriranje (`sysupdate` za APT, Flatpak i Snap), dubinsko čišćenje (`genclean` / `generalno-ciscenje`), čišćenje fontova (`fontovi`), univerzalno raspakivanje arhiva (`extract`), popravka FAT32 USB fleški (`popravi`), ACPI dijagnostika (`proveri-acpi`, `gpeprekid`). |
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
-
+| **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte ** | Dvosmerno preslovljavanje ćirilice i latinice (`preslovi`) preslovi.py).|
 ---
 
 ## 🚀 Kako funkcioniše komanda `pomoc`
@@ -69,7 +69,7 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
-### 4. `preslovi` skripta zahteva xclip (za X11) ili wl-clipboard (za Wayland)
+### 4. Skripta `~/.bash_tools/scripts/preslovi.py` zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland),
 
 ---
 
@@ -91,7 +91,7 @@ Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet
 * **Praktična upotreba Linux alata:** Kroz stvarne primere možeš videti kako rade i kako se kombinuju `awk`, `sed`, `grep`, `systemd`, `ip`, `ss` i `nmap`.
 * **Bezbedno čuvanje osetljivih podataka:** Odvajanje privatnih IP/MAC adresa i putanja do SSH ključeva u `local.env` (uz `.gitignore`) sprečava slučajno objavljivanje lokalnih podataka na GitHub.
 * **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
-* **Dvosmerno preslovljavanje:** Funkcija `preslovi` putem clipboard-a pretvara ćirilicu i latinicu i obrnuto (uz podršku za X11 i Wayland preko scripts/preslovi.py).
+* **Dvosmerno preslovljavanje:** Funkcija `preslovi` putem clipboard-a pretvara ćirilicu u latinicu i obrnuto  preko skripte scripts/preslovi.py (uz podršku za X11 `xclip` i Wayland `wl-clipboard`).
 * **Kontrola eksternih uređaja (IoT / TV):** Kroz modul za LG webOS prikazano je kako se preko SSH-a i JSON poruka (`luna-send`) upravlja pametnim uređajima na lokalnoj mreži direktno iz komandne linije.
 
 ---
