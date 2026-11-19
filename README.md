@@ -15,7 +15,7 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
-| **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte ** | Dvosmerno preslovljavanje ćirilice i latinice (`preslovi`) preslovi.py).|
+| **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`).|
 ---
 
 ## 🚀 Kako funkcioniše komanda `pomoc`
@@ -69,7 +69,8 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
-### 4. Skripta `~/.bash_tools/scripts/preslovi.py` zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland),
+### 4. Skripta `~/.bash_tools/scripts/preslovi.py`
+zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland),
 
 ---
 
