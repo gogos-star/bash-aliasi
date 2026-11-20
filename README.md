@@ -70,7 +70,7 @@ export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
 ### 4. Skripta `~/.bash_tools/scripts/preslovi.py`
-zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland), sudo apt install xclip wl-clipboard nmap
+zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland) ili instalirajte `sudo apt install xclip wl-clipboard nmap`
 
 ---
 
