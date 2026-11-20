@@ -1,8 +1,4 @@
 # 🧰 Bash Aliasi i Sistemski Alati (Debian / Linux) - DOS
-![OS](https://shields.io)
-![Shell](https://shields.io)
-![Desktop](https://shields.io)
-![License](https://shields.io)
 
 Modularna, čista i automatizovana kolekcija Bash aliasa, funkcija i alata optimizovanih za **Debian 13 (Trixie)** i **KDE Plasma 6**, ali primenljivih na većini savremenih Linux distribucija.
 
