@@ -1,4 +1,8 @@
 # 🧰 Bash Aliasi i Sistemski Alati (Debian / Linux) - DOS
+![OS](https://shields.io)
+![Shell](https://shields.io)
+![Desktop](https://shields.io)
+![License](https://shields.io)
 
 Modularna, čista i automatizovana kolekcija Bash aliasa, funkcija i alata optimizovanih za **Debian 13 (Trixie)** i **KDE Plasma 6**, ali primenljivih na većini savremenih Linux distribucija.
 
@@ -70,7 +74,7 @@ export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
 ### 4. Skripta `~/.bash_tools/scripts/preslovi.py`
-zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland),
+zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland), sudo apt install xclip wl-clipboard nmap
 
 ---
 
