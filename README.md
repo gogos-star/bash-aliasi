@@ -15,7 +15,7 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
-| **06-fotografije.sh** | **Fotografije i Multimedija** | Vraćanje Google Takeout metapodataka (`foto-json`), hronološko preimenovanje i razvrstavanje po godinama/mesecima (`foto-sredi`), paralelno izdvajanje računa i skrinšotova pomoću OCR-a (`foto-papiri`), čitanje GPS lokacije i mapa (`foto-lokacija`). |
+| **`06-media-foto.sh`** | **Fotografije i Multimedija** | Vraćanje Google Takeout metapodataka (`foto-json`), hronološko preimenovanje i razvrstavanje po godinama/mesecima (`foto-sredi`), paralelno izdvajanje računa i skrinšotova pomoću OCR-a (`foto-papiri`), čitanje GPS lokacije i mapa (`foto-lokacija`). |
 | **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`).|
 ---
 
@@ -70,7 +70,11 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
-### 4. Skripta `~/.bash_tools/scripts/preslovi.py`
+
+### Fotografije: `foto-papiri` zahteva tesseract-ocr
+`sudo apt update && sudo apt install tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn`
+
+### Skripta `~/.bash_tools/scripts/preslovi.py`
 zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland) ili instalirajte `sudo apt install xclip wl-clipboard nmap`
 
 ---
@@ -83,13 +87,14 @@ Nakon što otvorite novi terminal (ili pokrenete `source ~/.bashrc`), dostupne s
 - **`provera`** — Brzi status RAM memorije, temperature procesora, slobodnog diska i ključnih servisa.
 - **`sysupdate`** — Jednom komandom ažurira APT, Flatpak i Snap pakete.
 - itd.
+
 ---
 
 ## 🎓 Šta početnici mogu da nauče iz ovog repozitorijuma
 
 Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet **Debian / Linux** terminala i žele da vide kako se od običnih komandi gradi uredno, bezbedno i automatizovano radno okruženje:
 
-* **Modularna organizacija skripti:** Umesto jednog pretrpanog `.bashrc` fajla od hiljadu linija, konfiguracija je podeljena u manje, pregledne celine po temama (`01`–`05`).
+* **Modularna organizacija skripti:** Umesto jednog pretrpanog `.bashrc` fajla od hiljadu linija, konfiguracija je podeljena u manje, pregledne celine po temama.
 * **Praktična upotreba Linux alata:** Kroz stvarne primere možeš videti kako rade i kako se kombinuju `awk`, `sed`, `grep`, `systemd`, `ip`, `ss` i `nmap`.
 * **Bezbedno čuvanje osetljivih podataka:** Odvajanje privatnih IP/MAC adresa i putanja do SSH ključeva u `local.env` (uz `.gitignore`) sprečava slučajno objavljivanje lokalnih podataka na GitHub.
 * **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.

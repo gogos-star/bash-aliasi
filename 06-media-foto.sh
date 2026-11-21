@@ -80,7 +80,8 @@ foto-papiri() {
         slika="$1"
         prag="$2"
         cilj="$3"
-        tekst=$(OMP_THREAD_LIMIT=1 tesseract "$slika" stdout -l eng+srp_latn --oem 1 -psm 3 2>/dev/null | tr -d "[:space:]")
+#        tekst=$(OMP_THREAD_LIMIT=1 tesseract "$slika" stdout -l eng+srp_latn --oem 1 -psm 3 2>/dev/null | tr -d "[:space:]")
+        tekst=$(OMP_THREAD_LIMIT=1 tesseract "$slika" stdout -l eng+srp+srp_latn --oem 1 -psm 3 2>/dev/null | tr -d "[:space:]")
         duzina=${#tekst}
         if (( duzina >= prag )); then
             echo "[Pronađeno: ${duzina} znakova] -> $slika"
