@@ -39,7 +39,7 @@ alias git-izmeni="git-izmeni" # ["poruka"] - Dodaje izmene projekta, pravi commi
 
 # Prikazuje ovaj meni sa svim dostupnim alatima po kategorijama
 pomoc() {
-    printf "\n\033[1;35m==================== 🧰 MOJ TOOLS MENI (DEBIAN 13) 🧰 ====================\033[0m\n"
+    printf "\n\033[1;35m========================== 🧰 DOS TOOLS MENI 🧰 ==========================\033[0m\n"
 
     awk '
     BEGIN {
@@ -123,14 +123,17 @@ alias istorija='grep -e "Commandline:" /var/log/apt/history.log' # Pregled istor
 
 if [[ $- == *i* ]]; then
     if [ "$TERM" = "linux" ]; then
-        _ok "💻 [Debian Optimization System - DOS v2.0 by gogos --- TTY mode]"
+        _ok "💻 [Debian Optimization System - DOS v2.1 by gogos --- TTY mode]"
     else
-#        REAL_BOOT_TIME=$(systemd-analyze 2>/dev/null | grep -oP 'graphical\.target reached after \K[0-9min\s.]+s')
         REAL_BOOT_TIME=$(systemd-analyze 2>/dev/null | grep -oP '\+ \K[0-9min\s.]+s \(userspace\)' | sed 's/ (userspace)//')
-        _ok "💻 [Debian Optimization System - DOS v2.0 by gogos]"
+        _ok "💻 [Debian Optimization System - DOS v2.1 by gogos]"
         _info "⏱️  Desktop (userspace) ready in: ${REAL_BOOT_TIME}"
+
+        if command -v fastfetch >/dev/null 2>&1; then
+        [ -f "$HOME/.config/fastfetch/desktop.json" ] && fastfetch --config "$HOME/.config/fastfetch/desktop.json" || fastfetch
+        fi
     fi
-    fastfetch # --config ~/.config/fastfetch/desktop.jsonc
     provera
 fi
+
 
