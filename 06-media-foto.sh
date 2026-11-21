@@ -22,18 +22,10 @@ foto-json() {
 foto-sredi() {
     command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
 
-    local tag="FileName"
-    local dry_run=0
-    for arg in "$@"; do
-        if [[ "$arg" == "test" || "$arg" == "-n" || "$arg" == "--dry-run" ]]; then
-            tag="testname"
-            dry_run=1
-        fi
-    done
-
+    echo "Preimenovanje slika/videa po datumu i razvrstavanje"
     echo "Izaberi strukturu foldera:"
-    echo "  1) Po godinama            (npr. 2024/2024-05-12_14-30-00.jpg)"
-    echo "  2) Po godinama i mesecima (npr. 2024/2024-05/2024-05-12_14-30-00.jpg)"
+    echo " 1) Po godinama (npr. 2024/2024-05-12_14-30-00.jpg)"
+    echo " 2) Po godinama i mesecima (npr. 2024/2024-05/2024-05-12_14-30-00.jpg)"
     read -r -p "Unesi izbor [1/2]: " izbor
 
     local putanja_format
@@ -43,16 +35,37 @@ foto-sredi() {
         *) echo "Nevažeći izbor. Otkazano."; return 0 ;;
     esac
 
-    if [[ $dry_run -eq 1 ]]; then
-        echo "=== TEST REŽIM (DRY-RUN): Prikaz plana bez ikakvih izmena na disku ==="
-    else
-        echo "Trenutni folder: $(pwd)"
-        read -r -p "Da li želiš da pokreneš razvrstavanje ovde? [d/N]: " odgovor
-        [[ ! "$odgovor" =~ ^[dDyY]$ ]] && { echo "Otkazano."; return 0; }
-    fi
+    echo ""
+    echo "Trenutni folder: $(pwd)"
+    echo "Šta želiš da uradiš?"
+    echo " d) Da, pokreni stvarno preimenovanje i razvrstavanje"
+    echo " t) Test (prikaži plan bez ikakvih izmena na disku)"
+    echo " n) Ne, otkaži"
+    read -r -p "Unesi izbor [d/t/N]: " odgovor
 
-    echo "Obrada i razvrstavanje svih slika i video snimaka (rekurzivno)..."
-    exiftool -r "-${tag}<FileModifyDate" "-${tag}<MediaCreateDate" "-${tag}<CreateDate" "-${tag}<DateTimeOriginal" "-${tag}<SubSecDateTimeOriginal" \
+    local tag="FileName"
+    case "$odgovor" in
+        [dDyY])
+            echo "=== POKREĆEM STVARNU OBRADU ==="
+            ;;
+        [tT])
+            tag="testname"
+            echo "=== TEST REŽIM (DRY-RUN): Prikaz plana bez izmena ==="
+            ;;
+        *)
+            echo "Otkazano."
+            return 0
+            ;;
+    esac
+
+    echo "Obrada novih slika i video snimaka (preskačem foldere sa godinama)..."
+    exiftool -r \
+        -if '$Directory !~ m{/(19|20)\d{2}(/|$)}' \
+        "-${tag}<FileModifyDate" \
+        "-${tag}<MediaCreateDate" \
+        "-${tag}<CreateDate" \
+        "-${tag}<DateTimeOriginal" \
+        "-${tag}<SubSecDateTimeOriginal" \
         -d "$putanja_format" \
         -ext jpg -ext jpeg -ext png -ext heic -ext webp -ext mp4 -ext mov .
 
