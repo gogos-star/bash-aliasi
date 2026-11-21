@@ -18,7 +18,7 @@ foto-json() {
     echo "Metapodaci iz JSON-a su upisani!"
 }
 
-# [test] - Preimenuje slike/videe po datumu i razvrstava (1: godine, 2: godine i meseci)
+# Preimenovanje slika/videa po datumu i razvrstavanje (1: godine, 2: godine i meseci)
 foto-sredi() {
     command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
 
