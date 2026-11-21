@@ -15,6 +15,7 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
+| **06-fotografije.sh** | **Fotografije i Multimedija** | Vraćanje Google Takeout metapodataka (`foto-json`), hronološko preimenovanje i razvrstavanje po godinama/mesecima (`foto-sredi`), paralelno izdvajanje računa i skrinšotova pomoću OCR-a (`foto-papiri`), čitanje GPS lokacije i mapa (`foto-lokacija`). |
 | **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`).|
 ---
 
