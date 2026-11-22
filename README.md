@@ -11,17 +11,11 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 | Fajl | Kategorija | Ključne mogućnosti |
 | :--- | :--- | :--- |
 | **`01-sistem.sh`** | **Sistem, Dijagnostika i Hardver** | Dijagnostika hardvera (`provera` - RAM, CPU temperatura, disk, IP), praćenje senzora (`temp`), TLP napajanje (`tlpstat`), restart KDE panela (`resplasma`) i SDDM-a (`reskde`), bekap konfiguracija (`sacuvaj-podesavanja`), promena jezika sesije (`cirilica`, `latinica`, `engleski`), kontrola štampača (`stampac`) i GPS-a (`gps`). |
-
 | **`02-paketi.sh`** | **Održavanje, Paketi i Diskovi** | Kompletno ažuriranje (`sysupdate` za APT, Flatpak i Snap), dubinsko čišćenje (`genclean` / `generalno-ciscenje`), čišćenje fontova (`fontovi`), univerzalno raspakivanje arhiva (`extract`), popravka FAT32 USB fleški (`popravi`), ACPI dijagnostika (`proveri-acpi`, `gpeprekid`), povezivanje KGet ekstenzije (`kget-chrome`). |
-
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
-
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
-
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
-
 | **`06-media-foto.sh`** | **Fotografije i Multimedija** | Vraćanje Google Takeout metapodataka (`foto-json`), hronološko preimenovanje i razvrstavanje po godinama/mesecima (`foto-sredi`), paralelno izdvajanje računa i skrinšotova pomoću OCR-a (`foto-papiri`), čitanje GPS lokacije i mapa (`foto-lokacija`). |
-
 | **`~/.bash_tools/scripts/`** | **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`), `kget-mv3/` Chrome/Chromium Manifest V3 ekstenzija sa Native Messaging hostom za KGet. |
 
 ---
