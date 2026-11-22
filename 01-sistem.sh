@@ -57,17 +57,42 @@ provera() {
     _srv_stat "TLP servis" "tlp.service"
     _srv_stat "AD Guard" "AdGuardHome.service"
 
+    # 1. RAM sa pragovima (žuto >= 70%, crveno >= 85%)
     printf "\033[1;34m-> %-17s\033[0m " "Iskorišćen RAM:"
-    free -m | awk 'NR==2{printf "%sMB / %sMB (%.2f%%)\n", $3, $2, $3*100/$2}'
+    free -m | awk 'NR==2{
+        pct = $3 * 100 / $2;
+        if (pct >= 85) color = "\033[1;31m";
+        else if (pct >= 70) color = "\033[1;33m";
+        else color = "\033[0;32m";
+        printf "%s%sMB / %sMB (%.2f%%)\033[0m\n", color, $3, $2, pct
+    }'
 
+    # 2. CPU Temperatura (zeleno < 70°C, žuto 70-84°C, crveno trepćuće + zvuk >= 85°C)
     local CPU_TEMP_FILE="/sys/class/thermal/thermal_zone5/temp"
     if [ -r "$CPU_TEMP_FILE" ] && [ "$(< /sys/class/thermal/thermal_zone5/type)" = "x86_pkg_temp" ]; then
         local RAW_TEMP=$(< "$CPU_TEMP_FILE")
-        printf "\033[1;34m-> %-17s\033[0m %d.%d°C\n" "Temperatura CPU:" $((RAW_TEMP / 1000)) $(((RAW_TEMP % 1000) / 100))
+        local TEMP_C=$((RAW_TEMP / 1000))
+        local TEMP_DEC=$(((RAW_TEMP % 1000) / 100))
+
+        if [ "$TEMP_C" -ge 85 ]; then
+            printf "\a\033[1;34m-> %-17s\033[0m \033[1;5;31m%d.%d°C 🔥 !!!\033[0m\n" "Temperatura CPU:" "$TEMP_C" "$TEMP_DEC"
+        elif [ "$TEMP_C" -ge 70 ]; then
+            printf "\033[1;34m-> %-17s\033[0m \033[1;33m%d.%d°C ⚠️\033[0m\n" "Temperatura CPU:" "$TEMP_C" "$TEMP_DEC"
+        else
+            printf "\033[1;34m-> %-17s\033[0m \033[0;32m%d.%d°C\033[0m\n" "Temperatura CPU:" "$TEMP_C" "$TEMP_DEC"
+        fi
     fi
 
+    # 3. Prostor na disku (žuto >= 80%, crveno >= 90%)
     printf "\033[1;34m-> %-17s\033[0m " "Prostor na disku:"
-    df -h / | awk 'NR==2{printf "%s slobodno od %s (iskorišćeno %s)\n", $4, $2, $3}'
+    df -h / | awk 'NR==2{
+        gsub(/%/, "", $5);
+        pct = $5 + 0;
+        if (pct >= 90) color = "\033[1;31m";
+        else if (pct >= 80) color = "\033[1;33m";
+        else color = "\033[0;32m";
+        printf "%s%s slobodno od %s (iskorišćeno %s - %d%%)\033[0m\n", color, $4, $2, $3, pct
+    }'
 
     local ROUTE_INFO=$(ip -4 route get 1.1.1.1 2>/dev/null)
     local IFACE=$(awk '{print $5; exit}' <<< "$ROUTE_INFO")

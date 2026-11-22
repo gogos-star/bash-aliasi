@@ -11,12 +11,18 @@ Svi alati su tematski podeljeni u zasebne module unutar foldera `~/.bash_tools/`
 | Fajl | Kategorija | Ključne mogućnosti |
 | :--- | :--- | :--- |
 | **`01-sistem.sh`** | **Sistem, Dijagnostika i Hardver** | Dijagnostika hardvera (`provera` - RAM, CPU temperatura, disk, IP), praćenje senzora (`temp`), TLP napajanje (`tlpstat`), restart KDE panela (`resplasma`) i SDDM-a (`reskde`), bekap konfiguracija (`sacuvaj-podesavanja`), promena jezika sesije (`cirilica`, `latinica`, `engleski`), kontrola štampača (`stampac`) i GPS-a (`gps`). |
-| **`02-paketi.sh`** | **Održavanje, Paketi i Diskovi** | Kompletno ažuriranje (`sysupdate` za APT, Flatpak i Snap), dubinsko čišćenje (`genclean` / `generalno-ciscenje`), čišćenje fontova (`fontovi`), univerzalno raspakivanje arhiva (`extract`), popravka FAT32 USB fleški (`popravi`), ACPI dijagnostika (`proveri-acpi`, `gpeprekid`). |
+
+** | Kompletno ažuriranje (`sysupdate` za APT, Flatpak i Snap), dubinsko čišćenje (`genclean` / `generalno-ciscenje`), čišćenje fontova (`fontovi`), univerzalno raspakivanje arhiva (`extract`), popravka FAT32 USB fleški (`popravi`), ACPI dijagnostika (`proveri-acpi`, `gpeprekid`), povezivanje KGet Chrome ekstenzije (`kget-chrome`). |
+
 | **`03-mreza-tv.sh`** | **Mreža, Bezbednost i LG TV** | Skeniranje uređaja na mreži (`kojenamrezi` / `kn`), skeniranje otvorenih portova (`netsken` / `ns`), pretraga torenta (`torrentsken` / `ts`), skeniranje veb servera (`websken` / `ws`), mrežni status računara (`net-info` / `ni`), brzi SSH ulaz (`ssh-in`), daljinska kontrola LG webOS TV-a (`tv-check`, `tv-ssh`, `tv-cmd`). |
+
 | **`04-build.sh`** | **Kompajliranje i Pakovanje (.deb)** | Smart-build automatizacija koja kompajlira projekat i automatski ga pakuje u `.deb` paket: `cmake-smart-build` (CMake), `make-smart-build` (Autotools/Make), `meson-smart-build` (Meson/Ninja), `pnpm-smart-build` (Nx/Electron), `pnpm-vite-build` (Vite frontend). |
+
 | **`05-pomoc-start.sh`** | **Pomoć i Korisnički Alati** | Dinamički samogenerišući meni (`pomoc`), startni status sistem dijagnostike pri otvaranju terminala, brzi tabelarni pregled svih aliasa (`aliasi`) i istorija instalacija (`istorija`). |
+
 | **`06-media-foto.sh`** | **Fotografije i Multimedija** | Vraćanje Google Takeout metapodataka (`foto-json`), hronološko preimenovanje i razvrstavanje po godinama/mesecima (`foto-sredi`), paralelno izdvajanje računa i skrinšotova pomoću OCR-a (`foto-papiri`), čitanje GPS lokacije i mapa (`foto-lokacija`). |
-| **`~/.bash_tools/scripts/`**| **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`).|
+
+| **~/.bash_tools/scripts/** | **Pomoćne Python skripte** | `preslovi.py` za dvosmerno preslovljavanje ćirilice i latinice (`preslovi`), `kget-mv3/` Chrome Manifest V3 ekstenzija sa Native Messaging hostom za KGet. |
 ---
 
 ## 🚀 Kako funkcioniše komanda `pomoc`
@@ -77,6 +83,18 @@ export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ### Skripta `~/.bash_tools/scripts/preslovi.py`
 zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland) ili instalirajte `sudo apt install xclip wl-clipboard nmap`
 
+### 🌐 KGet integracija u pregledač (`kget-chrome`)
+
+Ekstenzija omogućava da se sva preuzimanja iz **Google Chrome, Chromium, Brave, Vivaldi ili Edge** pregledača (ili pojedinačni linkovi preko desnog klika) automatski prosleđuju u **KGet**, uz **ON/OFF** prekidač direktno na ikonici ekstenzije:
+
+1. Otvori `chrome://extensions/` (ili `brave://extensions/`) i uključi **Developer mode**.
+2. Klikni na **Load unpacked** i izaberi folder `~/.bash_tools/scripts/kget-mv3`.
+3. Kopiraj dodeljeni **ID ekstenzije** i pokreni u terminalu (skripta automatski prepoznaje sve instalirane pregledače):
+
+```bash
+kget-chrome TVOJ_ID_EKSTENZIJE
+```
+
 ---
 
 ## 💡 Korišćenje
@@ -100,6 +118,7 @@ Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet
 * **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
 * **Dvosmerno preslovljavanje:** Funkcija `preslovi` putem clipboard-a pretvara ćirilicu u latinicu i obrnuto  preko skripte scripts/preslovi.py (uz podršku za X11 `xclip` i Wayland `wl-clipboard`).
 * **Kontrola eksternih uređaja (IoT / TV):** Kroz modul za LG webOS prikazano je kako se preko SSH-a i JSON poruka (`luna-send`) upravlja pametnim uređajima na lokalnoj mreži direktno iz komandne linije.
+* **Chrome Native Messaging (Browser -> Linux):** Kroz `scripts/kget-mv3` i funkciju `kget-chrome` prikazano je kako Manifest V3 ekstenzija bezbedno komunicira sa lokalnom Python skriptom putem `stdin`/`stdout` JSON poruka i pokreće sistemski program (`kget`).
 
 ---
 

@@ -128,9 +128,8 @@ if [[ $- == *i* ]]; then
         REAL_BOOT_TIME=$(systemd-analyze 2>/dev/null | grep -oP '\+ \K[0-9min\s.]+s \(userspace\)' | sed 's/ (userspace)//')
         _ok "💻 [Debian Optimization System - DOS v2.1 by gogos]"
         _info "⏱️  Desktop (userspace) ready in: ${REAL_BOOT_TIME}"
-
         if command -v fastfetch >/dev/null 2>&1; then
-        [ -f "$HOME/.config/fastfetch/desktop.json" ] && fastfetch --config "$HOME/.config/fastfetch/desktop.json" || fastfetch
+            [ -f "$HOME/.config/fastfetch/desktop.json" ] && fastfetch --config "$HOME/.config/fastfetch/desktop.json" || fastfetch
         fi
     fi
     provera

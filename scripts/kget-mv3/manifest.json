@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "KGet Capture MV3",
+  "version": "1.1",
+  "description": "Prosleđuje preuzimanja iz Chrome-a u KGet sa ON/OFF prekidačem",
+  "permissions": [
+    "downloads",
+    "contextMenus",
+    "nativeMessaging",
+    "storage"
+  ],
+  "action": {
+    "default_title": "KGet Capture (Klikni za ON/OFF)"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

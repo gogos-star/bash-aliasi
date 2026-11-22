@@ -157,3 +157,61 @@ haker() {
         sleep 0.05
     done
 }
+
+# [id_ekstenzije] - Instalira KGet (ako fali) i povezuje KGet ekstenziju za Chrome/Chromium/Brave
+kget-chrome() {
+    local ext_dir="$HOME/.bash_tools/scripts/kget-mv3"
+    local ext_id="$1"
+    local browser_dirs=(
+        "$HOME/.config/google-chrome"
+        "$HOME/.config/chromium"
+        "$HOME/.config/BraveSoftware/Brave-Browser"
+        "$HOME/.config/vivaldi"
+        "$HOME/.config/microsoft-edge"
+    )
+
+    if ! command -v kget >/dev/null 2>&1; then
+        echo "Instaliram KGet..."
+        sudo apt update && sudo apt install -y kget
+    fi
+
+    chmod +x "$ext_dir/kget_host.py"
+
+    if [ -z "$ext_id" ]; then
+        echo "1. Otvori stranicu za ekstenzije (chrome://extensions/ ili brave://extensions/)"
+        echo "2. Uključi 'Developer mode' -> 'Load unpacked'"
+        echo "3. Izaberi folder: $ext_dir"
+        echo ""
+        read -rp "Nalepi ID učitane ekstenzije: " ext_id
+    fi
+
+    if [ -z "$ext_id" ]; then
+        echo "Greška: Nije unet ID ekstenzije."
+        return 1
+    fi
+
+    local povezano=0
+    for b_dir in "${browser_dirs[@]}"; do
+        if [ -d "$b_dir" ]; then
+            mkdir -p "$b_dir/NativeMessagingHosts"
+            cat << JSON > "$b_dir/NativeMessagingHosts/com.kget.capture.json"
+{
+  "name": "com.kget.capture",
+  "description": "KGet Native Messaging Host",
+  "path": "$ext_dir/kget_host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://$ext_id/"
+  ]
+}
+JSON
+            echo "✔ Povezano za: $(basename "$b_dir")"
+            povezano=$((povezano + 1))
+        fi
+    done
+
+    if [ "$povezano" -eq 0 ]; then
+        echo "Nije pronađen nijedan podržani pregledač u ~/.config/."
+        return 1
+    fi
+}
