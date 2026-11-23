@@ -1,21 +1,69 @@
 #!/usr/bin/env bash
 #[6. FOTOGRAFIJE I MULTIMEDIJA]
 
-# [takeout] - Vraća originalni datum i GPS iz Google Takeout .json fajlova u slike/videe
+# [takeout] - Vraća originalni datum i GPS iz Google Takeout .json fajlova u slike/videe i briše iskorišćene JSON-e
 foto-json() {
     command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
     echo "Trenutni folder: $(pwd)"
-    read -r -p "Upiši EXIF datume iz Google Takeout .json fajlova u slike ovde? [d/N]: " odgovor
+    read -r -p "Upiši EXIF datume i obriši iskorišćene .json fajlove ovde? [d/N]: " odgovor
     [[ ! "$odgovor" =~ ^[dDyY]$ ]] && { echo "Otkazano."; return 0; }
 
-    exiftool -r -d "%s" -tagsfromfile "%d/%f.%e.json" \
-        "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
-        "-CreateDate<PhotoTakenTimeTimestamp" \
-        "-GPSLatitude<GeoDataLatitude" \
-        "-GPSLongitude<GeoDataLongitude" \
-        -overwrite_original \
-        -ext jpg -ext jpeg -ext png -ext heic -ext webp -ext mp4 -ext mov .
-    echo "Metapodaci iz JSON-a su upisani!"
+    # 1. Preimenovanje SVIH Google Takeout sufiksa (sa -iregex da hvata i .JPG i .jpg)
+    find . -type f -regextype posix-extended -iregex '.*\.(jpg|jpeg|png|heic|webp|mp4|mov)\.s[a-z-]*(\.json)?$' -exec bash -c '
+        for f; do
+            novi=$(echo "$f" | sed -E "s/\.s[a-z-]*(\.json)?$/.json/i")
+            mv -n "$f" "$novi"
+        done
+    ' bash {} +
+
+    # 2. Ispravljanje Google-ovog baga sa duplikatima: slika.JPG(1).json -> slika(1).JPG.json
+    find . -type f -regextype posix-extended -iregex '.*\.[a-z0-9]+\([0-9]+\)(\.json)?$' -exec bash -c '
+        for f; do
+            novi=$(echo "$f" | sed -E "s/(\.[a-z0-9]+)(\([0-9]+\))(\.json)?$/\2\1.json/i")
+            mv -n "$f" "$novi"
+        done
+    ' bash {} +
+
+    # 3. Ispravljanje lažnih PNG fajlova (JPEG fajlovi koji imaju .png/.PNG ekstenziju)
+    find . -type f \( -iname "*.png" \) -exec bash -c '
+        for f; do
+            if [[ $(file -b --mime-type "$f") == "image/jpeg" ]]; then
+                novi="${f%.*}.jpg"
+                mv -n "$f" "$novi"
+                [[ -f "${f}.json" ]] && mv -n "${f}.json" "${novi}.json"
+            fi
+        done
+    ' bash {} +
+
+    # 4. Kopiranje JSON-a za -измењено i -edited verzije
+    find . -type f \( -name "*-измењено.*" -o -name "*-edited.*" \) ! -name "*.json" -exec bash -c '
+        for f; do
+            orig="${f/-измењено./.}"
+            orig="${orig/-edited./.}"
+            [[ -f "${orig}.json" && ! -f "${f}.json" ]] && cp "${orig}.json" "${f}.json"
+        done
+    ' bash {} +
+
+    # 5. Upisivanje EXIF metapodataka (samo za slike koje imaju svoj .json)
+    find . -type f -name "*.json" ! -name "metadata.json" -exec bash -c '
+        for j; do
+            slika="${j%.json}"
+            if [[ -f "$slika" ]]; then
+                if exiftool -q -q -d "%s" -tagsfromfile "$j" \
+                    "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
+                    "-CreateDate<PhotoTakenTimeTimestamp" \
+                    "-GPSLatitude<GeoDataLatitude" \
+                    "-GPSLongitude<GeoDataLongitude" \
+                    -overwrite_original "$slika"; then
+                    rm -f "$j"
+                else
+                    echo "Greška pri upisu u: $slika (JSON sačuvan)"
+                fi
+            fi
+        done
+    ' bash {} +
+
+    echo "Gotovo!"
 }
 
 # Preimenovanje slika/videa po datumu i razvrstavanje (1: godine, 2: godine i meseci)
