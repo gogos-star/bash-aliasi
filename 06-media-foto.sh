@@ -196,6 +196,7 @@ foto-lokacija() {
     echo "GPS:    $koordinate"
     echo "OSM:    https://openstreetmap.org{koordinate%,*}&mlon=${koordinate#*,}&zoom=16"
     echo "GMap:   https://google.com{koordinate}"
+
 }
 
 # [odrediste=FOTO_BEKAP_DIR] [izvor=.] - Proverava SMART zdravlje diska i kopira nove slike iz trenutnog foldera
@@ -213,17 +214,24 @@ foto-bekap() {
         return 1
     fi
 
+    if [ ! -d "$izvor" ]; then
+        echo "❌ Greška: Izvorni folder '$izvor' ne postoji."
+        return 1
+    fi
+
     [[ "$izvor" != */ ]] && izvor="${izvor}/"
 
-    local uredjaj
-    uredjaj=$(df "$odrediste" | awk 'NR==2 {print $1}' | sed 's/[0-9]*$//')
+    local particija uredjaj
+    particija=$(df --output=source "$odrediste" | tail -n 1)
+    uredjaj="/dev/$(lsblk -no PKNAME "$particija" 2>/dev/null)"
+    [[ "$uredjaj" == "/dev/" ]] && uredjaj=$(echo "$particija" | sed -E 's/p?[0-9]+$//')
 
-    if command -v smartctl &>/dev/null; then
+    if command -v smartctl &>/dev/null && [[ -b "$uredjaj" ]]; then
         echo "🔍 Zdravlje diska ($uredjaj):"
         sudo smartctl -H "$uredjaj" | grep -E "SMART overall-health|result" || echo "⚠️ USB kontroler ne prosleđuje SMART podatke."
     fi
 
-    echo "📸 Kopiram nove slike iz '$(pwd)' u '$odrediste'..."
+    echo "📸 Kopiram nove slike iz '$(realpath "$izvor")' u '$odrediste'..."
     rsync -rth --info=progress2 --ignore-existing --modify-window=2 "$izvor" "$odrediste"
 
     echo "💾 Zapisivanje keša na disk..."
