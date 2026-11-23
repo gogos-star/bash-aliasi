@@ -37,34 +37,46 @@ sysupdate() {
         fi
     }
 
-
 # genclean / generalno-ciscenje - Duboko čišćenje sistema, stranih rečnika, keša i logova
 generalno-ciscenje() {
     _info "🧹 Pokrećem generalno čišćenje sistema..."
     sudo systemctl stop packagekit 2>/dev/null
+    trap 'sudo systemctl start packagekit 2>/dev/null; trap - RETURN EXIT' RETURN EXIT
 
-    _info "🗑️ Uklanjam strane rečnike i azijske pakete..."
-    sudo apt purge -y hunspell-zh-cn hunspell-zh-tw hunspell-zh-hk hunspell-ko hunspell-vi \
-                     aspell-am aspell-fo aspell-ga aspell-is aspell-ku aspell-lt aspell-lv \
-                     myspell-tl myspell-af myspell-bg \
-                     fcitx fcitx-* fcitx5 fcitx5-* uim uim-* chewing* pinyin* anthy* m17n* \
+    _info "🗑️ Uklanjam strane rečnike i nepotrebne lokalizacije..."
+    sudo apt purge -y fcitx fcitx-* fcitx5 fcitx5-* uim uim-* chewing* pinyin* anthy* m17n* \
                      plasma-thunderbolt >/dev/null 2>&1
 
-    sudo apt purge -y "*-l10n-*" "*-localization-*" "*-translation-*" "language-pack-*" >/dev/null 2>&1
-    sudo apt install -y kde-l10n-en-gb 2>/dev/null
+    # Briše sve strane rečnike i prevode
+    sudo apt purge -y "hunspell-*" "aspell-*" "myspell-*" "mythes-*" "hyphen-*" \
+                     "*-l10n-*" "*-localization-*" "*-translation-*" "language-pack-*" >/dev/null 2>&1
+
+    # Vraća isključivo engleski i srpski (ćirilica + latinica)
+    sudo apt install -y hunspell-en-us hunspell-en-gb hunspell-sr aspell-en 2>/dev/null
+    dpkg -s libreoffice-common &>/dev/null && sudo apt install -y libreoffice-l10n-sr libreoffice-l10n-en-gb 2>/dev/null
+    dpkg -s firefox-esr &>/dev/null && sudo apt install -y firefox-esr-l10n-sr firefox-esr-l10n-en-gb 2>/dev/null
 
     sysupdate
 
-    _info "🧹 Čistim stare konfiguracije, Flatpak i logove..."
-    command -v flatpak &> /dev/null && flatpak uninstall --unused -y &>/dev/null
-    if [ "$(dpkg -l | grep -c '^rc')" -gt 0 ]; then
-        sudo apt purge -y $(dpkg -l | grep '^rc' | awk '{print $2}') >/dev/null 2>&1
+    _info "🧹 Čistim stare kernele, konfiguracije, Flatpak/Snap i logove..."
+    sudo apt autoremove --purge -y >/dev/null 2>&1
+    sudo apt autoclean -y >/dev/null 2>&1
+
+    command -v flatpak &>/dev/null && flatpak uninstall --unused -y &>/dev/null
+
+    if command -v snap &>/dev/null; then
+        snap list --all | awk '/disabled/{print $1, $3}' | while read -r ime rev; do
+            sudo snap remove "$ime" --revision="$rev" 2>/dev/null
+        done
     fi
+
+    mapfile -t rc_paketi < <(dpkg-query -f '${Status} ${Package}\n' -W | awk '/^deinstall ok config-files/ {print $4}')
+    (( ${#rc_paketi[@]} > 0 )) && sudo apt purge -y "${rc_paketi[@]}" >/dev/null 2>&1
+
     sudo journalctl --vacuum-time=2d 2>/dev/null
 
     killall -9 discover plasma-discover 2>/dev/null
     sudo rm -rf /var/crash/* /var/lib/systemd/coredump/* ~/.cache/drkonqi/*
-    sudo systemctl start packagekit 2>/dev/null
     _ok "✨ Sistem je potpuno očišćen i optimizovan!"
 }
 alias genclean='generalno-ciscenje'
@@ -75,7 +87,8 @@ fontovi() {
         ocisti)
             _info "🗑️ Uklanjam nepotrebne sistemske fontove..."
             sudo apt remove --purge -y fonts-kacst fonts-lao fonts-lklug-sinhala fonts-sil-abyssinica fonts-sil-padauk fonts-tibetan fonts-khmeros-core fonts-navilu fonts-samayak-fonts fonts-smc* fonts-pagul fonts-guru* fonts-amiri* fonts-gujr* fonts-beng* fonts-deva*
-            sudo apt purge -y fonts-noto-core fonts-noto-extra fonts-noto-ui-core fonts-noto-cjk fonts-noto-mono
+            # Čuva fonts-noto-core, ui-core i mono za KDE Plasmu 6, briše samo azijske i egzotične
+            sudo apt purge -y fonts-noto-extra fonts-noto-cjk fonts-noto-cjk-extra
             sudo apt autoremove --purge -y && fc-cache -f -v
             _ok "✅ Nepotrebni fontovi su očišćeni."
             ;;
@@ -90,20 +103,15 @@ fontovi() {
     esac
 }
 
-# =================================================================
-#                 ARHIVE, HARDVER I LOGOVI
-# =================================================================
-# [fajl] - Univerzalno raspakivanje arhiva (zip, rar, 7z, tar.gz...)
+# [fajl] - Univerzalno raspakivanje arhiva (zip, rar, 7z, tar.gz, tar.xz, tar.zst...)
 extract() {
     if [ ! -f "$1" ]; then _err "❌ '$1' fajl nije ispravan"; return 1; fi
     _info "📦 Raspakujem '$1'..."
     case "$1" in
-        *.tar.bz2|*.tbz2) tar xjf "$1" ;;
-        *.tar.gz|*.tgz)   tar xzf "$1" ;;
-         *.bz2)            bunzip2 "$1" ;;
+        *.tar.bz2|*.tbz2|*.tar.gz|*.tgz|*.tar.xz|*.txz|*.tar.zst|*.tar) tar xf "$1" ;;
+        *.bz2)            bunzip2 "$1" ;;
         *.rar)            unrar x "$1" ;;
         *.gz)             gunzip "$1" ;;
-        *.tar)            tar xf "$1" ;;
         *.zip)            unzip "$1" ;;
         *.Z)              uncompress "$1" ;;
         *.7z)             7z x "$1" ;;

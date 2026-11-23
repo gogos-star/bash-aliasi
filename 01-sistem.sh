@@ -5,7 +5,9 @@
 # =================================================================
 alias edit='mcedit'                               # Brzi tekstualni editor (Midnight Commander)
 alias birajeditor='_info "📝 Otvaram izbor sistemskog editora..."; sudo update-alternatives --config editor' # Izbor podrazumevanog sistemskog editora
+
 alias sacuvaj-podesavanja='_info "💾 Pravim bekap u /home..."; sudo tar -czf ~/podesavanja_backup_$(date +%Y-%m-%d).tar.gz /etc ~/.bash_aliases ~/.bash_tools ~/.bashrc ~/.ssh 2>/dev/null && _ok "✅ Bekap je sačuvan!"' # Bekap /etc, ~/.bash_tools, .bashrc i .ssh u /home
+
 alias cirilica2='systemctl --user set-environment LANG=sr_RS.UTF-8 LC_ALL=sr_RS.UTF-8 && _ok "✅ Sistemski jezik: ćirilica"' # Postavlja sistemski jezik na ćirilicu (okruženje)
 alias cirilica='export LANG=sr_RS.UTF-8 LC_ALL=sr_RS.UTF-8 && _ok "✅ Sesija: ćirilica"' # Prebacuje sesiju terminala na ćirilicu
 alias latinica='export LANG=sr_RS.UTF-8@latin LC_ALL=sr_RS.UTF-8@latin && _ok "✅ Sesija: latinica"' # Prebacuje sesiju terminala na latinicu
@@ -68,8 +70,15 @@ provera() {
     }'
 
     # 2. CPU Temperatura (zeleno < 70°C, žuto 70-84°C, crveno trepćuće + zvuk >= 85°C)
-    local CPU_TEMP_FILE="/sys/class/thermal/thermal_zone5/temp"
-    if [ -r "$CPU_TEMP_FILE" ] && [ "$(< /sys/class/thermal/thermal_zone5/type)" = "x86_pkg_temp" ]; then
+    local CPU_TEMP_FILE=""
+    for z in /sys/class/thermal/thermal_zone*; do
+        if [ -r "$z/type" ] && [ "$(< "$z/type")" = "x86_pkg_temp" ]; then
+            CPU_TEMP_FILE="$z/temp"
+            break
+        fi
+    done
+
+    if [ -r "$CPU_TEMP_FILE" ]; then
         local RAW_TEMP=$(< "$CPU_TEMP_FILE")
         local TEMP_C=$((RAW_TEMP / 1000))
         local TEMP_DEC=$(((RAW_TEMP % 1000) / 100))
@@ -99,8 +108,9 @@ provera() {
     local LOKALNA_IP=$(awk '{print $7; exit}' <<< "$ROUTE_INFO")
 
     printf "\033[1;34m-> %-17s\033[0m " "Lokalna IP adresa:"
-    if [ -n "$LOKALNA_IP" ]; then
-        local MAC_ADDR=$(< /sys/class/net/"$IFACE"/address)
+        if [ -n "$LOKALNA_IP" ]; then
+        local MAC_ADDR="VPN/Tunel"
+        [ -r "/sys/class/net/$IFACE/address" ] && MAC_ADDR=$(< "/sys/class/net/$IFACE/address")
         _ok "🌐 $LOKALNA_IP ($IFACE | $MAC_ADDR)"
     else
         _err "⚠️ Niste povezani"

@@ -1,6 +1,5 @@
-
 # =================================================================
-#                 POMOĆNE FUNKCIJE ZA BOJE I SERVISE i GIThub
+#                 POMOĆNE FUNKCIJE ZA BOJE I SERVISE
 # =================================================================
 _info() { printf "\033[1;34m%s\033[0m\n" "$*"; }
 _ok()   { printf "\033[1;32m%s\033[0m\n" "$*"; }
@@ -15,7 +14,11 @@ _srv_stat() {
     fi
 }
 
-# =============================================================
+# =================================================================
+# [5. POMOĆ I KORISNIČKI ALATI]
+# =================================================================
+
+# ["poruka"] - Dodaje izmene projekta, pravi commit i šalje na GitHub
 git-izmeni() {
     if [ -z "$1" ]; then
         _warn "ℹ️ Upotreba: git-izmeni \"Opis izmene\""
@@ -32,10 +35,6 @@ git-izmeni() {
     _info "🚀 Šaljem na GitHub..." && \
     git push
 }
-alias git-izmeni="git-izmeni" # ["poruka"] - Dodaje izmene projekta, pravi commit i šalje na GitHub
-# =================================================================
-# [5. POMOĆ I KORISNIČKI ALATI]
-# =================================================================
 
 # Prikazuje ovaj meni sa svim dostupnim alatima po kategorijama
 pomoc() {
@@ -60,15 +59,18 @@ pomoc() {
         last_desc = $0
         next
     }
-    # Prepoznavanje aliasa
+    # Prepoznavanje aliasa (POSIX kompatibilno za mawk i gawk)
     /^[[:space:]]*alias[[:space:]]+[a-zA-Z0-9_-]+=/ {
-        match($0, /^[[:space:]]*alias[[:space:]]+([^=]+)=(.*)$/, m)
-        cmd = m[1]
-        rest = m[2]
+        line = $0
+        sub(/^[[:space:]]*alias[[:space:]]+/, "", line)
+        eq_idx = index(line, "=")
+        cmd = substr(line, 1, eq_idx - 1)
+        rest = substr(line, eq_idx + 1)
         desc = last_desc
         last_desc = ""
-        if (match(rest, /#[[:space:]]*(.*)$/, c)) {
-            desc = c[1]
+        if (match(rest, /#[[:space:]]*.*$/)) {
+            desc = substr(rest, RSTART, RLENGTH)
+            sub(/^#[[:space:]]*/, "", desc)
         }
         if (desc != "") {
             format_and_print(cmd, desc)
@@ -77,8 +79,8 @@ pomoc() {
     }
     # Prepoznavanje javnih funkcija (ignorišu se pomoćne koje počinju sa _)
     /^[a-zA-Z0-9_-]+\(\)[[:space:]]*\{/ {
-        match($0, /^([a-zA-Z0-9_-]+)\(\)/, m)
-        cmd = m[1]
+        paren_idx = index($0, "()")
+        cmd = substr($0, 1, paren_idx - 1)
         desc = last_desc
         last_desc = ""
         if (cmd !~ /^_/ && desc != "") {
@@ -104,16 +106,13 @@ pomoc() {
             desc = sub_desc
         }
         printf "  " C_CMD "%-34s" C_RESET " - %s\n", cmd, desc
-
-
-
     }
     ' ~/.bash_tools/*.sh
 
     printf "\n\033[1;35m=========================================================================\033[0m\n\n"
 }
 
-alias aliasi="grep -hE '^(alias |[a-zA-Z0-9_-]+\(\))' ~/.bash_aliases ~/.bash_tools/*.sh | sed -E 's/^alias //; s/\(\).*//' | cut -d'=' -f1 | awk 'length(\$1) > 1' | column -x" # Tabelarni prikaz svih dostupnih aliasa i funkcija
+alias aliasi="grep -hE '^(alias |[a-zA-Z0-9_-]+\(\))' ~/.bash_aliases ~/.bash_tools/*.sh 2>/dev/null | sed -E 's/^alias //; s/\(\).*//' | cut -d'=' -f1 | awk 'length(\$1) > 1' | column -x" # Tabelarni prikaz svih dostupnih aliasa i funkcija
 
 alias istorija='grep -e "Commandline:" /var/log/apt/history.log' # Pregled istorije instaliranih APT paketa
 
@@ -127,12 +126,10 @@ if [[ $- == *i* ]]; then
     else
         REAL_BOOT_TIME=$(systemd-analyze 2>/dev/null | grep -oP '\+ \K[0-9min\s.]+s \(userspace\)' | sed 's/ (userspace)//')
         _ok "💻 [Debian Optimization System - DOS v2.1 by gogos]"
-        _info "⏱️  Desktop (userspace) ready in: ${REAL_BOOT_TIME}"
+        [ -n "$REAL_BOOT_TIME" ] && _info "⏱️  Desktop (userspace) ready in: ${REAL_BOOT_TIME}"
         if command -v fastfetch >/dev/null 2>&1; then
             [ -f "$HOME/.config/fastfetch/desktop.json" ] && fastfetch --config "$HOME/.config/fastfetch/desktop.json" || fastfetch
         fi
     fi
     provera
 fi
-
-

@@ -3,8 +3,8 @@
 
 # [takeout] - Vraća originalni datum i GPS iz Google Takeout .json fajlova u slike/videe i briše iskorišćene JSON-e
 foto-json() {
-    command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
-    command -v file >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'file'"; return 1; }
+    command -v exiftool >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
+    command -v file >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj paket 'file'"; return 1; }
 
     echo "Trenutni folder: $(pwd)"
     read -r -p "Upiši EXIF datume i obriši iskorišćene .json fajlove ovde? [d/N]: " odgovor
@@ -78,7 +78,7 @@ foto-json() {
                 if [[ $? -eq 0 ]]; then
                     rm -f "$j"
                 else
-                    echo "Greška pri upisu u: $slika (JSON sačuvan)"
+                    echo "❌  Greška pri upisu u: $slika (JSON sačuvan)"
                 fi
             fi
         done
@@ -89,7 +89,7 @@ foto-json() {
 
 # Preimenovanje slika/videa po datumu i razvrstavanje (1: godine, 2: godine i meseci)
 foto-sredi() {
-    command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
+    command -v exiftool >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
 
     echo "Preimenovanje slika/videa po datumu i razvrstavanje"
     echo "Izaberi strukturu foldera:"
@@ -143,7 +143,7 @@ foto-sredi() {
 
 # [ocr] - Paralelno pronalazi slike sa tekstom (računi, dokumenta, skrinšotovi) i izdvaja ih
 foto-papiri() {
-    command -v tesseract >/dev/null 2>&1 || { echo "Greška: Instaliraj 'tesseract-ocr' (i tesseract-ocr-srp-latn)"; return 1; }
+    command -v tesseract >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj 'tesseract-ocr' (i tesseract-ocr-srp-latn)"; return 1; }
 
     local prag=150
     local cilj="_papiri_i_tekst"
@@ -176,7 +176,7 @@ foto-papiri() {
 
 # [slika] - Prikazuje GPS lokaciju, datum, uređaj i link ka mapi gde je fotografija snimljena
 foto-lokacija() {
-    command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
+    command -v exiftool >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
     [[ -z "$1" || ! -f "$1" ]] && { echo "Upotreba: foto-lokacija <putanja_do_slike>"; return 1; }
 
     local koordinate datum model
@@ -196,7 +196,6 @@ foto-lokacija() {
     echo "GPS:    $koordinate"
     echo "OSM:    https://openstreetmap.org{koordinate%,*}&mlon=${koordinate#*,}&zoom=16"
     echo "GMap:   https://google.com{koordinate}"
-
 }
 
 # [odrediste=FOTO_BEKAP_DIR] [izvor=.] - Proverava SMART zdravlje diska i kopira nove slike iz trenutnog foldera

@@ -71,7 +71,6 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
-
 ### Fotografije: `foto-papiri` zahteva tesseract-ocr
 `sudo apt update && sudo apt install tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn`
 
@@ -79,6 +78,8 @@ export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland) ili instalirajte `sudo apt install xclip wl-clipboard nmap`
 
 ### 🌐 KGet integracija u pregledač (`kget-chrome`)
+
+### Sve dodatne instalacije na jednom mestu: `sudo apt update && sudo apt install -y libimage-exiftool-perl tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn smartmontools xclip wl-clipboard nmap jq`
 
 Ekstenzija omogućava da se sva preuzimanja iz **Google Chrome, Chromium, Brave, Vivaldi ili Edge** pregledača (ili pojedinačni linkovi preko desnog klika) automatski prosleđuju u **KGet**, uz **ON/OFF** prekidač direktno na ikonici ekstenzije:
 

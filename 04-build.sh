@@ -4,7 +4,7 @@
 
 # Kompajlira CMake projekat i pakuje ga u .deb (preko checkinstall)
 cmake-smart-build() {
-    local APP_NAME=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-')
+    local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
     local CURRENT_DIR="$PWD"
 
     if [ ! -f "CMakeLists.txt" ]; then
@@ -58,7 +58,9 @@ cmake-smart-build() {
 
 # Kompajlira Autotools/Make projekat i pakuje ga u .deb
 make-smart-build() {
-    local APP_NAME=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-')
+    command -v checkinstall >/dev/null 2>&1 || { echo "❌ Greška: Instaliraj 'checkinstall' (sudo apt install checkinstall)"; return 1; }
+
+    local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
     local CURRENT_DIR="$PWD"
 
     if [ ! -f "configure" ] && [ ! -f "autogen.sh" ] && [ ! -f "configure.ac" ] && [ ! -f "Makefile" ]; then
@@ -124,7 +126,9 @@ make-smart-build() {
 
 # Kompajlira Meson/Ninja projekat i pakuje ga u .deb
 meson-smart-build() {
-    local APP_NAME=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-')
+    command -v checkinstall >/dev/null 2>&1 || { echo "❌ Greška: Instaliraj 'checkinstall' (sudo apt install checkinstall)"; return 1; }
+
+    local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
     local CURRENT_DIR="$PWD"
 
     if [ ! -f "meson.build" ]; then
@@ -361,11 +365,11 @@ pnpm-install-deb() {
     local DEB_FILE=$(ls dist/executables/*.deb 2>/dev/null | head -n 1)
     if [ -n "$DEB_FILE" ]; then
         echo "📥 Pronađen paket: $DEB_FILE"
-        sudo dpkg -i "$DEB_FILE"
-        sudo apt-get install -f -y
+        sudo apt install -y "./$DEB_FILE" && \
         echo -e "\e[1;32m✅ APLIKACIJA JE USPEŠNO INSTALIRANA NA SISTEM!\e[0m"
     else
         echo "❌ Greška: .deb paket nije pronađen u dist/executables/ folderu!"
         return 1
     fi
 }
+

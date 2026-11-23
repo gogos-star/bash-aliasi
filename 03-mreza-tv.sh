@@ -198,23 +198,28 @@ tv-ssh() {
 # [komanda] - LG TV daljinski (off, reboot, toast, vol, youtube, screenoff, glass, install)
 tv-cmd() {
     local AKCIJA="$1"
+    local TV_PORT="${LG_TV_PORT:-22}"
     if [ -z "$AKCIJA" ]; then
-        _warn "ℹ️ Upotreba: tv-cmd [off | reboot | toast 'Tekst' | mute | unmute | vol 15 | youtube]"
+        _warn "ℹ️ Upotreba: tv-cmd [off | reboot | toast 'Tekst' | mute | unmute | vol 15 | youtube | screenoff | glass | install fajl.ipk]"
         return 1
     fi
 
-    _tv_exec() { ssh -i "$LG_TV_KEY" -o ConnectTimeout=3 root@"$LG_TV_IP" "$1"; }
+    _tv_exec() { ssh -i "$LG_TV_KEY" -p "$TV_PORT" -o ConnectTimeout=3 root@"$LG_TV_IP" "$1"; }
 
     case "$AKCIJA" in
-        off)     _info "📺 Gasim LG TV...";      _tv_exec "luna-send -n 1 luna://com.webos.service.tvpower/power/turnOff '{}'" ;;
-        reboot)  _info "🔄 Restartujem TV...";   _tv_exec "reboot" ;;
-        toast)   _info "💬 Šaljem poruku...";    _tv_exec "luna-send -n 1 luna://com.webos.notification/createToast '{\"message\":\"${2:-Pozdrav sa Linuxa!}\"}'" ;;
-        mute)    _info "🔇 Utišavam zvuk...";    _tv_exec "luna-send -n 1 luna://com.webos.audio/setMuted '{\"muted\":true}'" ;;
-        unmute)  _info "🔊 Uključujem zvuk...";  _tv_exec "luna-send -n 1 luna://com.webos.audio/setMuted '{\"muted\":false}'" ;;
-        vol)     _info "🔉 Zvuk na ${2:-15}..."; _tv_exec "luna-send -n 1 luna://com.webos.audio/setVolume '{\"volume\":${2:-15}}'" ;;
-        youtube) _info "▶️ Pokrećem YouTube..."; _tv_exec "luna-send -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"youtube.leanback.v4\"}'" ;;
-        *)       _info "⚡ Izvršavam: $*";       _tv_exec "$*" ;;
-                screenoff)
+        off)       _info "📺 Gasim LG TV...";      _tv_exec "luna-send -n 1 luna://com.webos.service.tvpower/power/turnOff '{}'" ;;
+        reboot)    _info "🔄 Restartujem TV...";   _tv_exec "reboot" ;;
+        toast)
+            local MSG="${2:-Pozdrav sa Linuxa!}"
+            MSG="${MSG//\"/\\\"}"
+            _info "💬 Šaljem poruku..."
+            _tv_exec "luna-send -n 1 luna://com.webos.notification/createToast '{\"message\":\"$MSG\"}'"
+            ;;
+        mute)      _info "🔇 Utišavam zvuk...";    _tv_exec "luna-send -n 1 luna://com.webos.audio/setMuted '{\"muted\":true}'" ;;
+        unmute)    _info "🔊 Uključujem zvuk...";  _tv_exec "luna-send -n 1 luna://com.webos.audio/setMuted '{\"muted\":false}'" ;;
+        vol)       _info "🔉 Zvuk na ${2:-15}..."; _tv_exec "luna-send -n 1 luna://com.webos.audio/setVolume '{\"volume\":${2:-15}}'" ;;
+        youtube)   _info "▶️ Pokrećem YouTube..."; _tv_exec "luna-send -n 1 luna://com.webos.applicationManager/launch '{\"id\":\"youtube.leanback.v4\"}'" ;;
+        screenoff)
             _info "🌑 Gasim ekran (zvuk ostaje)..."
             _tv_exec "luna-send -n 1 luna://com.webos.service.tvpower/power/turnOffScreen '{\"standbyMode\":\"active\"}'"
             ;;
@@ -229,20 +234,25 @@ tv-cmd() {
                 return 1
             fi
             local IME=$(basename "$IPK")
-            local APP_ID=$(python3 -c "import tarfile, json; t=tarfile.open('$IPK'); d=tarfile.open(fileobj=t.extractfile('./data.tar.gz')); m=[x for x in d.getnames() if x.endswith('appinfo.json')][0]; print(json.load(d.extractfile(m))['id'])" 2>/dev/null)
+            local APP_ID=$(python3 -c "import sys, tarfile, json; t=tarfile.open(sys.argv[1]); d=tarfile.open(fileobj=t.extractfile('./data.tar.gz')); m=[x for x in d.getnames() if x.endswith('appinfo.json')][0]; print(json.load(d.extractfile(m))['id'])" "$IPK" 2>/dev/null)
             _info "📦 Šaljem $IME na TV..."
-            scp -O -i "$LG_TV_KEY" "$IPK" root@"$LG_TV_IP":/tmp/ && \
+            scp -O -i "$LG_TV_KEY" -P "$TV_PORT" "$IPK" root@"$LG_TV_IP":/tmp/ && \
             _info "⚙️ Instaliram ${APP_ID:-$IME}..." && \
             _tv_exec "luna-send -n 1 -f luna://com.webos.appInstallService/dev/install '{\"id\":\"${APP_ID:-com.example.app}\",\"ipkUrl\":\"/tmp/$IME\",\"subscribe\":false}'"
             ;;
-
+        *)         _info "⚡ Izvršavam: $*";       _tv_exec "$*" ;;
     esac
 }
-# =================================================================
+
 # kojenamrezi / kn [X] - Spisak svih aktivnih uređaja, IP i MAC adresa
 kojenamrezi() {
     local OPSEG="${1:-$(_get_net)}"
     [[ "$OPSEG" =~ ^[0-9]+$ ]] && OPSEG="192.168.$OPSEG.0/24"
+
+    if [ -z "$OPSEG" ]; then
+        _err "❌ Greška: Niste na mreži niti ste uneli opseg (npr. kn 1)"
+        return 1
+    fi
 
     _info "📡 Aktivni uređaji na mreži: $OPSEG..."
     sudo nmap -sn -n "$OPSEG" | awk -v list="$(for k in "${!UREDJAJI[@]}"; do echo "${k,,}=${UREDJAJI[$k]}"; done)" '
@@ -262,6 +272,7 @@ kojenamrezi() {
     }'
     _ok "✅ Skeniranje uređaja završeno!"
 }
+
 # =================================================================
 alias kn='kojenamrezi'
 alias tv='tv-check'
