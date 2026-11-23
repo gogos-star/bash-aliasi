@@ -79,7 +79,10 @@ zahteva `xclip` (za X11) ili `wl-clipboard` (za Wayland) ili instalirajte `sudo 
 
 ### 🌐 KGet integracija u pregledač (`kget-chrome`)
 
-### Sve dodatne instalacije na jednom mestu: `sudo apt update && sudo apt install -y libimage-exiftool-perl tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn smartmontools xclip wl-clipboard nmap jq`
+### Sve dodatne instalacije na jednom mestu: 
+`sudo apt update && sudo apt install -y libimage-exiftool-perl tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn smartmontools xclip wl-clipboard nmap jq`
+
+---
 
 Ekstenzija omogućava da se sva preuzimanja iz **Google Chrome, Chromium, Brave, Vivaldi ili Edge** pregledača (ili pojedinačni linkovi preko desnog klika) automatski prosleđuju u **KGet**, uz **ON/OFF** prekidač direktno na ikonici ekstenzije:
 
