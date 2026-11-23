@@ -90,7 +90,7 @@ kget-chrome TVOJ_ID_EKSTENZIJE
 ```
 ---
 
-### Sve dodatne instalacije na jednom mestu: 
+### Sve potrebne pakete mozete instalirati jednom komandom: 
 `sudo apt update && sudo apt install -y libimage-exiftool-perl tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn smartmontools xclip wl-clipboard nmap jq`
 
 ---
