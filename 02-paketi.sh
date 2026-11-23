@@ -2,6 +2,9 @@
 # [2. ODRŽAVANJE, PAKETI I DISKOVI]
 # =================================================================
 
+alias disk-proveri='sudo smartctl -H /dev/sdX'   # Brza provera diska (PASSED/FAILED)
+alias disk-sektor='sudo smartctl -A /dev/sdX'   # Detalji: gledaj Reallocated_Sector_Ct i Pending_Sector
+
 # Kompletno ažuriranje sistema (APT upgrade + Flatpak + Snap)
 sysupdate() {
         _info "🔄 Osvežavam listu paketa..."

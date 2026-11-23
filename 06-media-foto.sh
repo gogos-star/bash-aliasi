@@ -4,28 +4,31 @@
 # [takeout] - Vraća originalni datum i GPS iz Google Takeout .json fajlova u slike/videe i briše iskorišćene JSON-e
 foto-json() {
     command -v exiftool >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'libimage-exiftool-perl'"; return 1; }
+    command -v file >/dev/null 2>&1 || { echo "Greška: Instaliraj paket 'file'"; return 1; }
+
     echo "Trenutni folder: $(pwd)"
     read -r -p "Upiši EXIF datume i obriši iskorišćene .json fajlove ovde? [d/N]: " odgovor
     [[ ! "$odgovor" =~ ^[dDyY]$ ]] && { echo "Otkazano."; return 0; }
 
-    # 1. Preimenovanje SVIH Google Takeout sufiksa (sa -iregex da hvata i .JPG i .jpg)
-    find . -type f -regextype posix-extended -iregex '.*\.(jpg|jpeg|png|heic|webp|mp4|mov)\.s[a-z-]*(\.json)?$' -exec bash -c '
+    # 1. Preimenovanje Google Takeout sufiksa (npr. .supplemental-metadata.json, .suppl.json, ili skraćeno .s)
+    # Hvata i slučaj kada je broj duplikata pre .json (npr. slika.jpg.supplemental-metadata(1).json)
+    find . -type f -regextype posix-extended -iregex '.*\.(jpg|jpeg|png|heic|webp|gif|mp4|mov|avi|mkv)\.s[a-z-]*(\([0-9]+\))?(\.json)?$' -exec bash -c '
         for f; do
-            novi=$(echo "$f" | sed -E "s/\.s[a-z-]*(\.json)?$/.json/i")
+            novi=$(echo "$f" | sed -E "s/\.s[a-z-]*(\([0-9]+\))?(\.json)?$/\1.json/i")
             mv -n "$f" "$novi"
         done
     ' bash {} +
 
-    # 2. Ispravljanje Google-ovog baga sa duplikatima: slika.JPG(1).json -> slika(1).JPG.json
-    find . -type f -regextype posix-extended -iregex '.*\.[a-z0-9]+\([0-9]+\)(\.json)?$' -exec bash -c '
+    # 2. Ispravljanje Google-ovog baga sa duplikatima (SAMO za .json fajlove): slika.JPG(1).json -> slika(1).JPG.json
+    find . -type f -regextype posix-extended -iregex '.*\.(jpg|jpeg|png|heic|webp|gif|mp4|mov|avi|mkv)\([0-9]+\)\.json$' -exec bash -c '
         for f; do
-            novi=$(echo "$f" | sed -E "s/(\.[a-z0-9]+)(\([0-9]+\))(\.json)?$/\2\1.json/i")
+            novi=$(echo "$f" | sed -E "s/(\.[a-z0-9]+)(\([0-9]+\))\.json$/\2\1.json/i")
             mv -n "$f" "$novi"
         done
     ' bash {} +
 
     # 3. Ispravljanje lažnih PNG fajlova (JPEG fajlovi koji imaju .png/.PNG ekstenziju)
-    find . -type f \( -iname "*.png" \) -exec bash -c '
+    find . -type f -iname "*.png" -exec bash -c '
         for f; do
             if [[ $(file -b --mime-type "$f") == "image/jpeg" ]]; then
                 novi="${f%.*}.jpg"
@@ -44,17 +47,35 @@ foto-json() {
         done
     ' bash {} +
 
-    # 5. Upisivanje EXIF metapodataka (samo za slike koje imaju svoj .json)
+    # 5. Upisivanje EXIF/QuickTime datuma i GPS metapodataka
     find . -type f -name "*.json" ! -name "metadata.json" -exec bash -c '
         for j; do
             slika="${j%.json}"
             if [[ -f "$slika" ]]; then
-                if exiftool -q -q -d "%s" -tagsfromfile "$j" \
-                    "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
-                    "-CreateDate<PhotoTakenTimeTimestamp" \
-                    "-GPSLatitude<GeoDataLatitude" \
-                    "-GPSLongitude<GeoDataLongitude" \
-                    -overwrite_original "$slika"; then
+                # Provera da li JSON ima validne GPS koordinate (različite od 0)
+                ima_gps=$(exiftool -s3 -GeoDataLatitude "$j" 2>/dev/null)
+
+                if [[ -n "$ima_gps" && "$ima_gps" != "0" && "$ima_gps" != "0.0" ]]; then
+                    exiftool -q -q -d "%s" -tagsfromfile "$j" \
+                        "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
+                        "-CreateDate<PhotoTakenTimeTimestamp" \
+                        "-TrackCreateDate<PhotoTakenTimeTimestamp" \
+                        "-MediaCreateDate<PhotoTakenTimeTimestamp" \
+                        "-GPSLatitude<GeoDataLatitude" \
+                        "-GPSLatitudeRef<GeoDataLatitude" \
+                        "-GPSLongitude<GeoDataLongitude" \
+                        "-GPSLongitudeRef<GeoDataLongitude" \
+                        -overwrite_original "$slika"
+                else
+                    exiftool -q -q -d "%s" -tagsfromfile "$j" \
+                        "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
+                        "-CreateDate<PhotoTakenTimeTimestamp" \
+                        "-TrackCreateDate<PhotoTakenTimeTimestamp" \
+                        "-MediaCreateDate<PhotoTakenTimeTimestamp" \
+                        -overwrite_original "$slika"
+                fi
+
+                if [[ $? -eq 0 ]]; then
                     rm -f "$j"
                 else
                     echo "Greška pri upisu u: $slika (JSON sačuvan)"
@@ -176,3 +197,40 @@ foto-lokacija() {
     echo "OSM:    https://openstreetmap.org{koordinate%,*}&mlon=${koordinate#*,}&zoom=16"
     echo "GMap:   https://google.com{koordinate}"
 }
+
+# [odrediste=FOTO_BEKAP_DIR] [izvor=.] - Proverava SMART zdravlje diska i kopira nove slike iz trenutnog foldera
+foto-bekap() {
+    local odrediste="${1:-$FOTO_BEKAP_DIR}"
+    local izvor="${2:-.}"
+
+    if [ -z "$odrediste" ]; then
+        echo "❌ Greška: Nije definisan FOTO_BEKAP_DIR u local.env niti je prosleđena putanja."
+        return 1
+    fi
+
+    if [ ! -d "$odrediste" ]; then
+        echo "❌ Greška: Odredište '$odrediste' nije dostupno. Da li je eksterni disk povezan?"
+        return 1
+    fi
+
+    [[ "$izvor" != */ ]] && izvor="${izvor}/"
+
+    local uredjaj
+    uredjaj=$(df "$odrediste" | awk 'NR==2 {print $1}' | sed 's/[0-9]*$//')
+
+    if command -v smartctl &>/dev/null; then
+        echo "🔍 Zdravlje diska ($uredjaj):"
+        sudo smartctl -H "$uredjaj" | grep -E "SMART overall-health|result" || echo "⚠️ USB kontroler ne prosleđuje SMART podatke."
+    fi
+
+    echo "📸 Kopiram nove slike iz '$(pwd)' u '$odrediste'..."
+    rsync -rth --info=progress2 --ignore-existing --modify-window=2 "$izvor" "$odrediste"
+
+    echo "💾 Zapisivanje keša na disk..."
+    sync
+    echo "✅ Gotovo! Sve nove slike su na disku."
+}
+
+
+
+
