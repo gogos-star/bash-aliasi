@@ -2,8 +2,58 @@
 # [2. ODRŽAVANJE, PAKETI I DISKOVI]
 # =================================================================
 
-alias disk-proveri='sudo smartctl -H /dev/sdX'   # Brza provera diska (PASSED/FAILED)
-alias disk-sektor='sudo smartctl -A /dev/sdX'   # Detalji: gledaj Reallocated_Sector_Ct i Pending_Sector
+# [disk] - Brza S.M.A.R.T. provera zdravlja diska (podrazumevano sda; radi za NVMe, SATA i USB)
+disk-proveri() {
+    local disk="/dev/${1:-sda}"
+    if [ ! -b "$disk" ]; then
+        echo "Greška: Uređaj $disk ne postoji. Proveri oznaku sa 'lsblk'."
+        return 1
+    fi
+
+    sudo smartctl -H "$disk" 2>/dev/null || \
+    sudo smartctl -d scsi -H "$disk" 2>/dev/null || \
+    sudo smartctl -d sat -H "$disk"
+}
+
+# [disk] - Detaljni S.M.A.R.T. parametri diska: temperatura, radni sati i loši sektori (podrazumevano sda)
+disk-sektor() {
+    local disk="/dev/${1:-sda}"
+    if [ ! -b "$disk" ]; then
+        echo "Greška: Uređaj $disk ne postoji. Proveri oznaku sa 'lsblk'."
+        return 1
+    fi
+
+    local izlaz
+    izlaz=$(sudo smartctl -a "$disk" 2>/dev/null)
+    if ! echo "$izlaz" | grep -qiE "SMART|Health|Device Model|Product"; then
+        izlaz=$(sudo smartctl -d scsi -a "$disk" 2>/dev/null)
+    fi
+    if ! echo "$izlaz" | grep -qiE "SMART|Health|Device Model|Product"; then
+        izlaz=$(sudo smartctl -d sat -a "$disk" 2>/dev/null)
+    fi
+
+    echo "$izlaz" | grep -iE "model|product|health|temp|error|defect|reallocated|pending|uncorrectable|hours|cycles"
+}
+
+# Pregled svih povezanih fizičkih diskova, njihovih oznaka, kapaciteta i temperature
+disk-info() {
+    echo "=== POVEZANI DISKOVI I TEMPERATURA ==="
+    lsblk -d -o NAME,SIZE,MODEL,TRAN | grep -vE "^(loop|zram)"
+    echo ""
+    for d in /dev/sd? /dev/nvme?n?; do
+        [ -b "$d" ] || continue
+        local izlaz temp
+        izlaz=$(sudo smartctl -a "$d" 2>/dev/null)
+        if ! echo "$izlaz" | grep -qiE "Temperature|SMART|Health"; then
+            izlaz=$(sudo smartctl -d scsi -a "$d" 2>/dev/null)
+        fi
+        temp=$(echo "$izlaz" | grep -iE "Temperature:" | head -n 1 | sed 's/.*Temperature:[[:space:]]*//')
+        if [ -z "$temp" ]; then
+            temp=$(echo "$izlaz" | grep -i "Temperature_Celsius" | head -n 1 | awk '{print $10 " Celsius"}')
+        fi
+        [ -n "$temp" ] && echo "$d -> Temperatura: $temp"
+    done
+}
 
 # Kompletno ažuriranje sistema (APT upgrade + Flatpak + Snap)
 sysupdate() {
