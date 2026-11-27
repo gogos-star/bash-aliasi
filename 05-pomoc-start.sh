@@ -135,7 +135,7 @@ if [[ $- == *i* ]]; then
 fi
 
 # =================================================================
-#               PAMETNE TAB DOPUNE (AUTOCOMPLETE)]
+#               PAMETNE TAB DOPUNE (AUTOCOMPLETE)
 # =================================================================
 
 # Prikazuje spisak komandi koje podržavaju pametnu Tab dopunu
@@ -152,39 +152,48 @@ dopune() {
     printf "\033[1;35m=============================================================\033[0m\n\n"
 }
 
-if [ -n "$ZSH_VERSION" ] && command -v compdef >/dev/null 2>&1; then
+if [ -n "$ZSH_VERSION" ]; then
+    autoload -Uz compinit && compinit -C
 
     # 1. Fiksne opcije za sistemske komande
     _dos_stampac() { _arguments '1:akcija:(on off)'; }
     _dos_gps()     { _arguments '1:akcija:(on off sat signal trazi)'; }
     _dos_fontovi() { _arguments '1:akcija:(ocisti ms-remove)'; }
 
-    # 2. LG TV daljinski (nudi komande, a posle 'install' nudi samo .ipk fajlove)
+    # 2. LG TV daljinski
     _dos_tv_cmd() {
         _arguments \
             '1:komanda:(off reboot toast mute unmute vol youtube screenoff glass install)' \
             '2:fajl:_files -g "*.ipk"'
     }
 
-    # 3. Dinamički pronalazi povezane diskove (sda, sdb, nvme0n1...)
+    # 3. Dinamički pronalazi povezane diskove (bez (N:t) sintakse koja ruši Bash)
     _dos_diskovi() {
-        local disks=(/sys/block/(sd*|nvme*)(N:t))
+        setopt local_options null_glob
+        local disks=() d
+        for d in /sys/block/sd* /sys/block/nvme*; do
+            disks+=("${d##*/}")
+        done
         _describe 'disk' disks
     }
 
-    # 4. Dinamički pronalazi particije fleški (npr. b1, c1 za /dev/sdb1)
+    # 4. Dinamički pronalazi particije fleški (b1, c1...)
     _dos_fleske() {
-        local parts=(/dev/sd[b-z][0-9]*(N:t))
-        parts=(${parts#sd})
+        setopt local_options null_glob
+        local parts=() p name
+        for p in /dev/sd[b-z][0-9]*; do
+            name="${p##*/}"
+            parts+=("${name#sd}")
+        done
         _describe 'particija' parts
     }
 
-    # 5. Raspakivanje - na Tab nudi samo arhive (.zip, .rar, .7z, .tar...)
+    # 5. Raspakivanje arhiva
     _dos_extract() {
         _files -g '*.(tar|tar.gz|tgz|tar.bz2|tbz2|tar.xz|txz|tar.zst|zip|rar|7z|gz|bz2|Z)'
     }
 
-    # Povezivanje funkcija sa komandama
+    # Povezivanje funkcija sa komandama (Zsh)
     compdef _dos_stampac stampac
     compdef _dos_gps gps
     compdef _dos_fontovi fontovi
@@ -194,9 +203,54 @@ if [ -n "$ZSH_VERSION" ] && command -v compdef >/dev/null 2>&1; then
     compdef _dos_extract extract
 
 elif [ -n "$BASH_VERSION" ]; then
-    # Osnovna podrška i za Bash
+
+    # 1. LG TV daljinski (komande + .ipk fajlovi posle 'install')
+    _dos_bash_tv_cmd() {
+        local cur="${COMP_WORDS[COMP_CWORD]}"
+        local prev="${COMP_WORDS[COMP_CWORD-1]}"
+        if [[ "$prev" == "install" ]]; then
+            COMPREPLY=($(compgen -f -X '!*.ipk' -- "$cur"))
+        elif [[ $COMP_CWORD -eq 1 ]]; then
+            COMPREPLY=($(compgen -W "off reboot toast mute unmute vol youtube screenoff glass install" -- "$cur"))
+        fi
+    }
+
+    # 2. Dinamički pronalazi povezane diskove (sda, sdb, nvme0n1...)
+    _dos_bash_diskovi() {
+        local cur="${COMP_WORDS[COMP_CWORD]}"
+        local disks="" d
+        for d in /sys/block/sd* /sys/block/nvme*; do
+            [[ -e "$d" ]] && disks+="${d##*/} "
+        done
+        COMPREPLY=($(compgen -W "$disks" -- "$cur"))
+    }
+
+    # 3. Dinamički pronalazi particije fleški (b1, c1...)
+    _dos_bash_fleske() {
+        local cur="${COMP_WORDS[COMP_CWORD]}"
+        local parts="" p name
+        for p in /dev/sd[b-z][0-9]*; do
+            if [[ -e "$p" ]]; then
+                name="${p##*/}"
+                parts+="${name#sd} "
+            fi
+        done
+        COMPREPLY=($(compgen -W "$parts" -- "$cur"))
+    }
+
+    # 4. Raspakivanje arhiva
+    _dos_bash_extract() {
+        local cur="${COMP_WORDS[COMP_CWORD]}"
+        local IFS=$'\n'
+        COMPREPLY=($(compgen -f -X '!*.@(tar|tar.gz|tgz|tar.bz2|tbz2|tar.xz|txz|tar.zst|zip|rar|7z|gz|bz2|Z)' -- "$cur"))
+    }
+
+    # Povezivanje funkcija sa komandama (Bash)
     complete -W "on off" stampac
     complete -W "on off sat signal trazi" gps
     complete -W "ocisti ms-remove" fontovi
-    complete -W "off reboot toast mute unmute vol youtube screenoff glass install" tv-cmd
+    complete -F _dos_bash_tv_cmd tv-cmd
+    complete -F _dos_bash_diskovi disk-proveri disk-sektor
+    complete -F _dos_bash_fleske popravi
+    complete -o filenames -F _dos_bash_extract extract
 fi
