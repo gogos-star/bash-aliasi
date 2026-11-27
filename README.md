@@ -75,7 +75,7 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
-* Ako korisnici koriste Zsh, declare -gA UREDJAJI=(...) radi u oba shell-a, ali je sigurnije da stoji typeset -gA UREDJAJI=(...) (radi identično i u Bash-u i u Zsh-u).
+* Ako koristite Zsh, declare -gA UREDJAJI=(...) radi u oba shell-a, ali je sigurnije da stoji typeset -gA UREDJAJI=(...) (radi identično i u Bash-u i u Zsh-u).
 
 ### Fotografije: `foto-papiri` zahteva tesseract-ocr
 `sudo apt update && sudo apt install tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn`
