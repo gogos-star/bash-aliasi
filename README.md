@@ -55,8 +55,8 @@ Klonirajte ovaj repozitorijum direktno u vaš korisnički folder kao `~/.bash_to
 git clone https://github.com/gogos-star/bash-aliasi.git ~/.bash_tools
 ```
 
-### 2. Povezivanje sa `~/.bashrc`
-Uverite se da vaš `~/.bash_aliases` učitava ove module. Ako već nemate `~/.bash_aliases`, dodajte sledeće u vaš `~/.bashrc` (ili u `~/.bash_aliases`):
+### 2. Povezivanje sa `~/.bashrc` i `~/.zshrc`
+Dodajte sledeće u vaš `~/.bashrc` (ili u `~/.bash_aliases`) ili u ~/.zshrc:
 ```bash
 if [ -d ~/.bash_tools ]; then
     for modul in ~/.bash_tools/*.sh; do
