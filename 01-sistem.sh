@@ -1,4 +1,5 @@
-
+# bash shell ---- chsh -s $(which bash)
+# zsh shell ----- chsh -s $(which zsh)
 
 # =================================================================
 # [1. SISTEM, DIJAGNOSTIKA I HARDVER]
@@ -179,14 +180,35 @@ gps() {
 
 osvezi_sistem() {
     local GRESKA=0
-    for f in ~/.bashrc ~/.bash_aliases ~/.bash_tools/*.sh; do
-        if [ -f "$f" ] && ! bash -n "$f"; then
-            _err "⚠️ Problem u fajlu: $f"
-            GRESKA=1
+    local fajlovi=()
+
+    if [ -n "$ZSH_VERSION" ]; then
+        fajlovi=(~/.zshrc ~/.bash_tools/*.sh(N))
+    else
+        fajlovi=(~/.bashrc ~/.bash_aliases ~/.bash_tools/*.sh)
+    fi
+
+    for f in "${fajlovi[@]}"; do
+        [ -f "$f" ] || continue
+        if [ -n "$ZSH_VERSION" ]; then
+            if ! zsh -n "$f"; then
+                _err "⚠️ Zsh problem u fajlu: $f"
+                GRESKA=1
+            fi
+        else
+            if ! bash -n "$f"; then
+                _err "⚠️ Bash problem u fajlu: $f"
+                GRESKA=1
+            fi
         fi
     done
+
     if [ $GRESKA -eq 0 ]; then
-        source ~/.bashrc
+        if [ -n "$ZSH_VERSION" ]; then
+            source ~/.zshrc
+        else
+            source ~/.bashrc
+        fi
         systemctl --user daemon-reload 2>/dev/null
         _ok "✅ Svi moduli su provereni i osveženi!"
     else
@@ -194,4 +216,5 @@ osvezi_sistem() {
     fi
 }
 alias osvezi="osvezi_sistem" # Provera sintakse i ponovno učitavanje svih alata
+
 

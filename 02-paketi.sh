@@ -40,6 +40,7 @@ disk-info() {
     echo "=== POVEZANI DISKOVI I TEMPERATURA ==="
     lsblk -d -o NAME,SIZE,MODEL,TRAN | grep -vE "^(loop|zram)"
     echo ""
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     for d in /dev/sd? /dev/nvme?n?; do
         [ -b "$d" ] || continue
         local izlaz temp
@@ -120,8 +121,12 @@ generalno-ciscenje() {
         done
     fi
 
-    mapfile -t rc_paketi < <(dpkg-query -f '${Status} ${Package}\n' -W | awk '/^deinstall ok config-files/ {print $4}')
-    (( ${#rc_paketi[@]} > 0 )) && sudo apt purge -y "${rc_paketi[@]}" >/dev/null 2>&1
+    local rc_paketi
+    rc_paketi=$(dpkg-query -f '${Status} ${Package}\n' -W | awk '/^deinstall ok config-files/ {print $4}')
+    [ -n "$rc_paketi" ] && echo "$rc_paketi" | xargs -r sudo apt purge -y >/dev/null 2>&1
+
+#    mapfile -t rc_paketi < <(dpkg-query -f '${Status} ${Package}\n' -W | awk '/^deinstall ok config-files/ {print $4}')
+#    (( ${#rc_paketi[@]} > 0 )) && sudo apt purge -y "${rc_paketi[@]}" >/dev/null 2>&1
 
     sudo journalctl --vacuum-time=2d 2>/dev/null
 
@@ -195,11 +200,12 @@ proveri-acpi() {
 gpeprekid() {
     printf "%-12s %-12s %-12s\n" "GPE PREKID" "BROJ" "STATUS"
     echo "--------------------------------------"
+    local f name val stanje
     for f in /sys/firmware/acpi/interrupts/gpe*; do
+        [ -r "$f" ] || continue
         name=$(basename "$f")
-        val=$(awk '{print $1}' "$f")
-        status=$(awk '{print $2}' "$f")
-        [ "$val" -ne 0 ] 2>/dev/null && printf "%-12s %-12s %-12s\n" "$name" "$val" "$status"
+        read -r val stanje < "$f"
+        [ "$val" -ne 0 ] 2>/dev/null && printf "%-12s %-12s %-12s\n" "$name" "$val" "$stanje"
     done | sort -rn -k2
 }
 
@@ -243,7 +249,10 @@ kget-chrome() {
         echo "2. Uključi 'Developer mode' -> 'Load unpacked'"
         echo "3. Izaberi folder: $ext_dir"
         echo ""
-        read -rp "Nalepi ID učitane ekstenzije: " ext_id
+        printf "Nalepi ID učitane ekstenzije: "
+        read -r ext_id
+
+#        read -rp "Nalepi ID učitane ekstenzije: " ext_id
     fi
 
     if [ -z "$ext_id" ]; then

@@ -7,7 +7,8 @@ foto-json() {
     command -v file >/dev/null 2>&1 || { echo "❌  Greška: Instaliraj paket 'file'"; return 1; }
 
     echo "Trenutni folder: $(pwd)"
-    read -r -p "Upiši EXIF datume i obriši iskorišćene .json fajlove ovde? [d/N]: " odgovor
+    printf "Upiši EXIF datume i obriši iskorišćene .json fajlove ovde? [d/N]: "
+    read -r odgovor
     [[ ! "$odgovor" =~ ^[dDyY]$ ]] && { echo "Otkazano."; return 0; }
 
     # 1. Preimenovanje Google Takeout sufiksa (npr. .supplemental-metadata.json, .suppl.json, ili skraćeno .s)
@@ -95,7 +96,8 @@ foto-sredi() {
     echo "Izaberi strukturu foldera:"
     echo " 1) Po godinama (npr. 2024/2024-05-12_14-30-00.jpg)"
     echo " 2) Po godinama i mesecima (npr. 2024/2024-05/2024-05-12_14-30-00.jpg)"
-    read -r -p "Unesi izbor [1/2]: " izbor
+    printf "Unesi izbor [1/2]: "
+    read -r izbor
 
     local putanja_format
     case "$izbor" in
@@ -110,7 +112,8 @@ foto-sredi() {
     echo " d) Da, pokreni stvarno preimenovanje i razvrstavanje"
     echo " t) Test (prikaži plan bez ikakvih izmena na disku)"
     echo " n) Ne, otkaži"
-    read -r -p "Unesi izbor [d/t/N]: " odgovor
+    printf "Unesi izbor [d/t/N]: "
+    read -r odgovor
 
     local tag="FileName"
     case "$odgovor" in
@@ -152,7 +155,8 @@ foto-papiri() {
 
     echo "Trenutni folder: $(pwd)"
     echo "Broj procesorskih jezgara koja će se koristiti: $jezgra"
-    read -r -p "Pretraži slike sa tekstom (prag: ${prag} znakova) i premesti u '$cilj'? [d/N]: " odgovor
+    printf "Pretraži slike sa tekstom (prag: %s znakova) i premesti u '%s'? [d/N]: " "$prag" "$cilj"
+    read -r odgovor
     [[ ! "$odgovor" =~ ^[dDyY]$ ]] && { echo "Otkazano."; return 0; }
 
     mkdir -p "$cilj"
@@ -192,7 +196,6 @@ foto-lokacija() {
         echo "Lokacija: Ova fotografija nema sačuvane GPS podatke."
         return 0
     fi
-
     echo "GPS:    $koordinate"
     echo "OSM:    https://openstreetmap.org{koordinate%,*}&mlon=${koordinate#*,}&zoom=16"
     echo "GMap:   https://google.com{koordinate}"

@@ -112,7 +112,7 @@ pomoc() {
     printf "\n\033[1;35m=========================================================================\033[0m\n\n"
 }
 
-alias aliasi="grep -hE '^(alias |[a-zA-Z0-9_-]+\(\))' ~/.bash_aliases ~/.bash_tools/*.sh 2>/dev/null | sed -E 's/^alias //; s/\(\).*//' | cut -d'=' -f1 | awk 'length(\$1) > 1' | column -x" # Tabelarni prikaz svih dostupnih aliasa i funkcija
+alias aliasi="grep -hE '^(alias |[a-zA-Z0-9_-]+\(\))' ~/.zshrc ~/.bash_aliases ~/.bash_tools/*.sh 2>/dev/null | sed -E 's/^alias //; s/\(\).*//' | cut -d'=' -f1 | awk 'length(\$1) > 1' | column -x"  # Tabelarni prikaz svih dostupnih aliasa i funkcija
 
 alias istorija='grep -e "Commandline:" /var/log/apt/history.log' # Pregled istorije instaliranih APT paketa
 

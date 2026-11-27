@@ -4,6 +4,7 @@
 
 # Kompajlira CMake projekat i pakuje ga u .deb (preko checkinstall)
 cmake-smart-build() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
     local CURRENT_DIR="$PWD"
 
@@ -48,7 +49,8 @@ cmake-smart-build() {
     fi
 
     cd "$CURRENT_DIR" && cd ..
-    read -p "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера $CURRENT_DIR? (y/N): " CONFIRM
+    printf "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера %s? (y/N): " "$CURRENT_DIR"
+    read -r CONFIRM
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
         rm -rf "$CURRENT_DIR"
         echo "🗑️  Изворни код је обрисан."
@@ -58,6 +60,7 @@ cmake-smart-build() {
 
 # Kompajlira Autotools/Make projekat i pakuje ga u .deb
 make-smart-build() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     command -v checkinstall >/dev/null 2>&1 || { echo "❌ Greška: Instaliraj 'checkinstall' (sudo apt install checkinstall)"; return 1; }
 
     local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
@@ -116,7 +119,8 @@ make-smart-build() {
     fi
 
     cd ..
-    read -p "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера $CURRENT_DIR? (y/N): " CONFIRM
+    printf "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера %s? (y/N): " "$CURRENT_DIR"
+    read -r CONFIRM
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
         rm -rf "$CURRENT_DIR"
         echo "🗑️  Изворни код је обрисан."
@@ -126,6 +130,7 @@ make-smart-build() {
 
 # Kompajlira Meson/Ninja projekat i pakuje ga u .deb
 meson-smart-build() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     command -v checkinstall >/dev/null 2>&1 || { echo "❌ Greška: Instaliraj 'checkinstall' (sudo apt install checkinstall)"; return 1; }
 
     local APP_NAME=$(basename "$PWD" | tr '[:upper:]_' '[:lower:]-' | tr -cd '[:alnum:]-' | sed 's/^-*//;s/-*$//')
@@ -168,7 +173,8 @@ meson-smart-build() {
     fi
 
     cd "$CURRENT_DIR" && cd ..
-    read -p "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера $CURRENT_DIR? (y/N): " CONFIRM
+    printf "❓ Да ли желите да ОБРИШЕТЕ изворни код из фолдера %s? (y/N): " "$CURRENT_DIR"
+    read -r CONFIRM
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
         rm -rf "$CURRENT_DIR"
         echo "🗑️  Изворни код је обрисан."
@@ -178,6 +184,7 @@ meson-smart-build() {
 
 # Low-RAM build za Electron/Nx aplikacije (npr. IPTVnator)
 pnpm-smart-build() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     echo "🧹 0. Automatsko čišćenje zaostalih grešaka i keša..."
     rm -rf node_modules .nx apps/xtream-mock-server dist 2>/dev/null
     rm -f moj-builder.config.js index.js 2>/dev/null
@@ -362,6 +369,7 @@ EOF
 
 # Instalira sveže napravljen .deb paket iz dist/executables/
 pnpm-install-deb() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     local DEB_FILE=$(ls dist/executables/*.deb 2>/dev/null | head -n 1)
     if [ -n "$DEB_FILE" ]; then
         echo "📥 Pronađen paket: $DEB_FILE"

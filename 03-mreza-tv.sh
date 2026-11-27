@@ -26,11 +26,31 @@ _get_net() {
     ip -o -4 route show to default | awk '{print $3}' | sed 's/\.[0-9]*$/.0\/24/'
 }
 
+# Univerzalni ispis liste uređaja (KEY=VAL) za awk u Bash-u i Zsh-u
+_uredjaji_lista() {
+    local keys=()
+    if [ -n "$ZSH_VERSION" ]; then
+        eval 'keys=("${(@k)UREDJAJI}")'
+    else
+        eval 'keys=("${!UREDJAJI[@]}")'
+    fi
+    for k in "${keys[@]}"; do
+        printf "%s=%s\n" "$k" "${UREDJAJI[$k]}"
+    done
+}
+
 # Pomoćna funkcija koja prepoznaje MAC adrese i lepo formatira izlaz
 _format_nmap() {
-    local lista=""
-    for k in "${!UREDJAJI[@]}"; do
-        lista+="${k,,}=${UREDJAJI[$k]}"$'\n'
+    local lista=$(_uredjaji_lista)
+    local keys=()
+    if [ -n "$ZSH_VERSION" ]; then
+        eval 'keys=("${(@k)UREDJAJI}")'
+    else
+        eval 'keys=("${!UREDJAJI[@]}")'
+    fi
+
+    for k in "${keys[@]}"; do
+        lista+="${k}=${UREDJAJI[$k]}"$'\n'
     done
     local moja_ip=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
 
@@ -39,7 +59,7 @@ _format_nmap() {
         split(list, pairs, "\n")
         for (i in pairs) {
             split(pairs[i], kv, "=")
-            if (kv[1] != "") macs[kv[1]] = kv[2]
+            if (kv[1] != "") macs[tolower(kv[1])] = kv[2]
         }
     }
     /^Nmap scan report for/ {
@@ -69,17 +89,18 @@ _format_nmap() {
         }
     }'
 }
+
 # =================================================================
 # netsken / ns [X] [v] - Skenira mrežu, portove i MAC imena (dodaj 'v' za verzije)
 netsken() {
     local OPSEG=""
-    local DETALJNO=""
+    local DETALJNO=()
 
     for arg in "$@"; do
         if [[ "$arg" =~ ^[0-9]+$ ]]; then
             OPSEG="192.168.$arg.0/24"
         elif [[ "$arg" == "v" || "$arg" == "-v" ]]; then
-            DETALJNO="-sV --version-intensity 0"
+            DETALJNO=(-sV --version-intensity 0)
         fi
     done
 
@@ -89,12 +110,13 @@ netsken() {
         return 1
     fi
 
-    _info "🌐 Skeniram opseg: $OPSEG ${DETALJNO:+(sa verzijama servisa)}..."
-    sudo nmap -T4 -n --min-rate 1000 $DETALJNO -p 21,22,80,443,990,3389,8080,8443 --open "$OPSEG" \
+    _info "🌐 Skeniram opseg: $OPSEG ${DETALJNO[1]:+(sa verzijama servisa)}..."
+    sudo nmap -T4 -n --min-rate 1000 "${DETALJNO[@]}" -p 21,22,80,443,990,3389,8080,8443 --open "$OPSEG" \
     | sed '/unrecognized despite returning data/,/^$/d' \
     | _format_nmap
     _ok "✅ Skeniranje opsega $OPSEG završeno!"
 }
+
 # =================================================================
 # torrentsken / ts [X] - Traži aktivne torrent klijente i uređaje u mreži
 torrentsken() {
@@ -108,18 +130,19 @@ torrentsken() {
 
     local MOJA_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
     local RUTER_IP=$(ip -o -4 route show to default 2>/dev/null | awk '{print $3; exit}')
-    local EXCLUDE_PARAM=""
+    local EXCLUDE_PARAM=()
     if [ -n "$RUTER_IP" ] && [ -n "$MOJA_IP" ]; then
-        EXCLUDE_PARAM="--exclude $RUTER_IP,$MOJA_IP"
+        EXCLUDE_PARAM=(--exclude "$RUTER_IP,$MOJA_IP")
     elif [ -n "$RUTER_IP" ]; then
-        EXCLUDE_PARAM="--exclude $RUTER_IP"
+        EXCLUDE_PARAM=(--exclude "$RUTER_IP")
     fi
 
     _info "🧲 Tražim aktivne torrente na: $OPSEG..."
-    sudo nmap -T4 -n --min-rate 1500 $EXCLUDE_PARAM -p 6881-6889,49152-65535 --open "$OPSEG" \
+    sudo nmap -T4 -n --min-rate 1500 "${EXCLUDE_PARAM[@]}" -p 6881-6889,49152-65535 --open "$OPSEG" \
     | _format_nmap
     _ok "✅ Provera završena!"
 }
+
 # =================================================================
 # websken / ws [IP] - Traži veb servere i naslove stranica
 websken() {
@@ -255,12 +278,12 @@ kojenamrezi() {
     fi
 
     _info "📡 Aktivni uređaji na mreži: $OPSEG..."
-    sudo nmap -sn -n "$OPSEG" | awk -v list="$(for k in "${!UREDJAJI[@]}"; do echo "${k,,}=${UREDJAJI[$k]}"; done)" '
+    sudo nmap -sn -n "$OPSEG" | awk -v list="$(_uredjaji_lista)" '
     BEGIN {
         split(list, pairs, "\n")
         for (i in pairs) {
             split(pairs[i], kv, "=")
-            if (kv[1] != "") macs[kv[1]] = kv[2]
+            if (kv[1] != "") macs[tolower(kv[1])] = kv[2]
         }
     }
     /^Nmap scan report for/ { ip = $NF; gsub(/[()]/, "", ip) }
