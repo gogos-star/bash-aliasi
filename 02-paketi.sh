@@ -90,9 +90,15 @@ sysupdate() {
 
 # genclean / generalno-ciscenje - Duboko čišćenje sistema, stranih rečnika, keša i logova
 generalno-ciscenje() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     _info "🧹 Pokrećem generalno čišćenje sistema..."
     sudo systemctl stop packagekit 2>/dev/null
-    trap 'sudo systemctl start packagekit 2>/dev/null; trap - RETURN EXIT' RETURN EXIT
+        if [ -n "$ZSH_VERSION" ]; then
+        trap 'sudo systemctl start packagekit 2>/dev/null; trap - EXIT' EXIT
+    else
+        trap 'sudo systemctl start packagekit 2>/dev/null; trap - RETURN EXIT' RETURN EXIT
+    fi
+
 
     _info "🗑️ Uklanjam strane rečnike i nepotrebne lokalizacije..."
     sudo apt purge -y fcitx fcitx-* fcitx5 fcitx5-* uim uim-* chewing* pinyin* anthy* m17n* \
@@ -138,6 +144,7 @@ alias genclean='generalno-ciscenje'
 
 # [ocisti|ms-remove] - Upravljanje fontovima (čišćenje azijskih ili MS fontova)
 fontovi() {
+    [ -n "$ZSH_VERSION" ] && setopt local_options null_glob
     case "$1" in
         ocisti)
             _info "🗑️ Uklanjam nepotrebne sistemske fontove..."
