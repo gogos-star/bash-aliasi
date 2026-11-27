@@ -183,7 +183,8 @@ osvezi_sistem() {
     local fajlovi=()
 
     if [ -n "$ZSH_VERSION" ]; then
-        fajlovi=(~/.zshrc ~/.bash_tools/*.sh(N))
+        setopt local_options null_glob
+        fajlovi=(~/.zshrc ~/.bash_tools/*.sh)
     else
         fajlovi=(~/.bashrc ~/.bash_aliases ~/.bash_tools/*.sh)
     fi
@@ -215,6 +216,7 @@ osvezi_sistem() {
         _err "❌ GREŠKA U SINTAKSI: Izmene nisu učitane!"
     fi
 }
+
 alias osvezi="osvezi_sistem" # Provera sintakse i ponovno učitavanje svih alata
 
 

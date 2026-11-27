@@ -58,20 +58,10 @@ git clone https://github.com/gogos-star/bash-aliasi.git ~/.bash_tools
 ### 2. Povezivanje sa `~/.bashrc` i `~/.zshrc`
 Dodajte sledeće u vaš `~/.bashrc` (ili u `~/.bash_aliases`) ili u ~/.zshrc:
 ```bash
-if [ -d ~/.bash_tools ]; then
-    for modul in ~/.bash_tools/*.sh; do
-        [ -r "$modul" ] && source "$modul"
-    done
-fi
+for modul in ~/.bash_tools/*.sh; do
+    [ -r "$modul" ] && source "$modul"
+done
 ```
-```zsh
-if [ -d ~/.bash_tools ]; then
-    for modul in ~/.bash_tools/*.sh(N); do
-        [ -r "$modul" ] && source "$modul"
-    done
-fi
-```
-
 ### 3. Privatna lokalna podešavanja (`local.env`)
 Kako privatne IP i MAC adrese vaših kućnih uređaja ne bi dospele na javni Git, možete kreirati fajl `~/.bash_tools/local.env` (koji je automatski u `.gitignore`):
 
@@ -85,6 +75,8 @@ declare -gA UREDJAJI=(
 export LG_TV_IP="192.168.1.50"
 export LG_TV_KEY="$HOME/.ssh/moj_kljuc"
 ```
+* Ako korisnici koriste Zsh, declare -gA UREDJAJI=(...) radi u oba shell-a, ali je sigurnije da stoji typeset -gA UREDJAJI=(...) (radi identično i u Bash-u i u Zsh-u).
+
 ### Fotografije: `foto-papiri` zahteva tesseract-ocr
 `sudo apt update && sudo apt install tesseract-ocr tesseract-ocr-srp tesseract-ocr-srp-latn`
 
@@ -113,10 +105,11 @@ kget-chrome TVOJ_ID_EKSTENZIJE
 
 Nakon što otvorite novi terminal (ili pokrenete `source ~/.bashrc`), dostupne su sve komande:
 - **`pomoc`** — Prikazuje interaktivni pregled svih dostupnih alata i njihov opis.
-- **`osvezi`** — Proverava sintaksu svih modula pomoću `bash -n` i ponovo ih učitava bez restarta terminala.
+- **`osvezi`** — Proverava sintaksu svih modula pomoću `bash -n` ili `zsh -n` (u zavisnosti od aktivnog shell-a) i osvežava terminal sa source ~/.bashrc (ili source ~/.zshrc)
 - **`provera`** — Brzi status RAM memorije, temperature procesora, slobodnog diska i ključnih servisa.
 - **`sysupdate`** — Jednom komandom ažurira APT, Flatpak i Snap pakete.
 - itd.
+sada koristi bash -n ili zsh -n (u zavisnosti od aktivnog shell-a) i da se terminal osvežava sa source ~/.bashrc (ili source ~/.zshrc).
 
 ---
 
