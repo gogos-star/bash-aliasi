@@ -133,3 +133,70 @@ if [[ $- == *i* ]]; then
     fi
     provera
 fi
+
+# =================================================================
+#               PAMETNE TAB DOPUNE (AUTOCOMPLETE)]
+# =================================================================
+
+# Prikazuje spisak komandi koje podržavaju pametnu Tab dopunu
+dopune() {
+    printf "\n\033[1;35m========== ⌨️  KOMANDE SA PAMETNOM TAB DOPUNOM ⌨️  ==========\033[0m\n"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "stampac <Tab>" "on | off"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "gps <Tab>" "on | off | sat | signal | trazi"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "fontovi <Tab>" "ocisti | ms-remove"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "tv-cmd <Tab>" "off | reboot | toast | vol | install (.ipk)..."
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "disk-proveri <Tab>" "dinamički lista povezane diskove (sda, nvme...)"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "disk-sektor <Tab>" "dinamički lista povezane diskove (sda, nvme...)"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "popravi <Tab>" "dinamički lista FAT32 fleške (b1, c1...)"
+    printf "  \033[1;32m%-22s\033[0m -> %s\n" "extract <Tab>" "nudi samo arhive (.zip, .rar, .7z, .tar...)"
+    printf "\033[1;35m=============================================================\033[0m\n\n"
+}
+
+if [ -n "$ZSH_VERSION" ] && command -v compdef >/dev/null 2>&1; then
+
+    # 1. Fiksne opcije za sistemske komande
+    _dos_stampac() { _arguments '1:akcija:(on off)'; }
+    _dos_gps()     { _arguments '1:akcija:(on off sat signal trazi)'; }
+    _dos_fontovi() { _arguments '1:akcija:(ocisti ms-remove)'; }
+
+    # 2. LG TV daljinski (nudi komande, a posle 'install' nudi samo .ipk fajlove)
+    _dos_tv_cmd() {
+        _arguments \
+            '1:komanda:(off reboot toast mute unmute vol youtube screenoff glass install)' \
+            '2:fajl:_files -g "*.ipk"'
+    }
+
+    # 3. Dinamički pronalazi povezane diskove (sda, sdb, nvme0n1...)
+    _dos_diskovi() {
+        local disks=(/sys/block/(sd*|nvme*)(N:t))
+        _describe 'disk' disks
+    }
+
+    # 4. Dinamički pronalazi particije fleški (npr. b1, c1 za /dev/sdb1)
+    _dos_fleske() {
+        local parts=(/dev/sd[b-z][0-9]*(N:t))
+        parts=(${parts#sd})
+        _describe 'particija' parts
+    }
+
+    # 5. Raspakivanje - na Tab nudi samo arhive (.zip, .rar, .7z, .tar...)
+    _dos_extract() {
+        _files -g '*.(tar|tar.gz|tgz|tar.bz2|tbz2|tar.xz|txz|tar.zst|zip|rar|7z|gz|bz2|Z)'
+    }
+
+    # Povezivanje funkcija sa komandama
+    compdef _dos_stampac stampac
+    compdef _dos_gps gps
+    compdef _dos_fontovi fontovi
+    compdef _dos_tv_cmd tv-cmd
+    compdef _dos_diskovi disk-proveri disk-sektor
+    compdef _dos_fleske popravi
+    compdef _dos_extract extract
+
+elif [ -n "$BASH_VERSION" ]; then
+    # Osnovna podrška i za Bash
+    complete -W "on off" stampac
+    complete -W "on off sat signal trazi" gps
+    complete -W "ocisti ms-remove" fontovi
+    complete -W "off reboot toast mute unmute vol youtube screenoff glass install" tv-cmd
+fi
