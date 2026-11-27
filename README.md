@@ -5,10 +5,11 @@ Ovaj projekat predstavlja modularnu kolekciju Bash i Zsh aliasa i sistemskih ala
 ---
 
 Ključni moduli (~/.bash_tools/)
-• 01-sistem.sh: Dijagnostika hardvera, senzori, TLP, restart KDE/SDDM-a i bekap.
-• 02-paketi.sh: Ažuriranje sistema, čišćenje i S.M.A.R.T. dijagnostika.
-• 03-mreza-tv.sh: Skeniranje mreže, torenti, SSH i kontrola LG webOS TV-a.
-• 04-build.sh do 06-media-foto.sh: Automatizacija pakovanja, pomoćni meni, obrada fotografija i skripte (preslovi.py, KGet Manifest V3).
+* **01-sistem.sh: Dijagnostika hardvera, senzori, TLP, restart KDE/SDDM-a i bekap.
+* **02-paketi.sh: Ažuriranje sistema, čišćenje i S.M.A.R.T. dijagnostika.
+* **03-mreza-tv.sh: Skeniranje mreže, torenti, SSH i kontrola LG webOS TV-a.
+* **04-build.sh do 06-media-foto.sh: Automatizacija pakovanja, pomoćni meni, obrada fotografija 
+* **i skripte (preslovi.py, KGet Manifest V3).
 
 ---
 
