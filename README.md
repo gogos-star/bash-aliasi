@@ -56,7 +56,7 @@ git clone https://github.com/gogos-star/bash-aliasi.git ~/.bash_tools
 ```
 
 ### 2. Povezivanje sa `~/.bashrc` i `~/.zshrc`
-Dodajte sledeće u vaš `~/.bashrc` (ili u `~/.bash_aliases`) ili u ~/.zshrc:
+Dodajte sledeće u vaš `~/.bashrc` ili u ~/.zshrc:
 ```bash
 for modul in ~/.bash_tools/*.sh; do
     [ -r "$modul" ] && source "$modul"
@@ -117,10 +117,10 @@ sada koristi bash -n ili zsh -n (u zavisnosti od aktivnog shell-a) i da se termi
 
 Ovaj projekat je zamišljen i kao praktičan vodič za sve koji tek ulaze u svet **Debian / Linux** terminala i žele da vide kako se od običnih komandi gradi uredno, bezbedno i automatizovano radno okruženje:
 
-* **Modularna organizacija skripti:** Umesto jednog pretrpanog `.bashrc` fajla od hiljadu linija, konfiguracija je podeljena u manje, pregledne celine po temama.
+* **Modularna organizacija skripti:** Umesto jednog pretrpanog `.bashrc` ili `.zshrc` fajla od hiljadu linija, konfiguracija je podeljena u manje, pregledne celine po temama.
 * **Praktična upotreba Linux alata:** Kroz stvarne primere možeš videti kako rade i kako se kombinuju `awk`, `sed`, `grep`, `systemd`, `ip`, `ss` i `nmap`.
 * **Bezbedno čuvanje osetljivih podataka:** Odvajanje privatnih IP/MAC adresa i putanja do SSH ključeva u `local.env` (uz `.gitignore`) sprečava slučajno objavljivanje lokalnih podataka na GitHub.
-* **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
+* **Provera sintakse pre učitavanja:** Funkcija `osvezi` pokazuje kako se skripte prvo testiraju (`bash -n` ili `zsh -n`) pre nego što se primene u aktivnoj sesiji, čime se izbegavaju greške pri pokretanju terminala.
 * **Dvosmerno preslovljavanje:** Funkcija `preslovi` putem clipboard-a pretvara ćirilicu u latinicu i obrnuto  preko skripte scripts/preslovi.py (uz podršku za X11 `xclip` i Wayland `wl-clipboard`).
 * **Kontrola eksternih uređaja (IoT / TV):** Kroz modul za LG webOS prikazano je kako se preko SSH-a i JSON poruka (`luna-send`) upravlja pametnim uređajima na lokalnoj mreži direktno iz komandne linije.
 * **Chrome Native Messaging (Browser -> Linux):** Kroz `scripts/kget-mv3` i funkciju `kget-chrome` prikazano je kako Manifest V3 ekstenzija bezbedno komunicira sa lokalnom Python skriptom putem `stdin`/`stdout` JSON poruka i pokreće sistemski program (`kget`).
