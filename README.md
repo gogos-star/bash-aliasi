@@ -63,6 +63,7 @@ if [ -d ~/.bash_tools ]; then
         [ -r "$modul" ] && source "$modul"
     done
 fi
+```
 ```zsh
 if [ -d ~/.bash_tools ]; then
     for modul in ~/.bash_tools/*.sh(N); do
